@@ -19,4 +19,10 @@ public interface RoleCodeService {
      */
     Optional<RoleCode> findById(String id);
 
+    /**
+     * Find all active RoleCodes.
+     * @return active records
+     */
+    List<RoleCode> findActiveRoleCodes();
+
 }

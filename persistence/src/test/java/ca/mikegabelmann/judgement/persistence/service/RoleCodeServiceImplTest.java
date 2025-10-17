@@ -37,6 +37,7 @@ class RoleCodeServiceImplTest {
     void findAll() {
         Mockito.when(roleCodeRepository.findAll()).thenReturn(Arrays.asList(roleCode1, roleCode2));
         List<RoleCode> roleCodes = roleCodeService.findAll();
+
         Assertions.assertNotNull(roleCodes);
         Assertions.assertEquals(2, roleCodes.size());
     }
@@ -45,8 +46,18 @@ class RoleCodeServiceImplTest {
     void findById() {
         Mockito.when(roleCodeRepository.findById(roleCode1.getId())).thenReturn(Optional.of(roleCode1));
         Optional<RoleCode> roleCode = roleCodeService.findById(roleCode1.getId());
+
         Assertions.assertNotNull(roleCode);
         Assertions.assertTrue(roleCode.isPresent());
+    }
+
+    @Test
+    void findActiveRoleCodes() {
+        Mockito.when(roleCodeRepository.findAllByActiveTrue()).thenReturn(Arrays.asList(roleCode1));
+        List<RoleCode> roleCodes = roleCodeService.findActiveRoleCodes();
+
+        Assertions.assertNotNull(roleCodes);
+        Assertions.assertEquals(1, roleCodes.size());
     }
 
 }
