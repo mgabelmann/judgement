@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd"
+         root="true">
+
+    <modelVersion>4.1.0</modelVersion>
+
+    <parent>
+        <groupId>ca.mikegabelmann.maven</groupId>
+        <artifactId>parent</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </parent>
+
+    <groupId>ca.mikegabelmann</groupId>
+    <artifactId>judgement</artifactId>
+    <version>0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Judgement</name>
+    <description>Demonstration project using Spring Boot, REST, and H2 database.</description>
+
+    <scm>
+        <connection>scm:git:https://github.com/mgabelmann/judgement.git</connection>
+        <developerConnection>scm:git:https://github.com/mgabelmann/judgement.git</developerConnection>
+        <url>https://github.com/mgabelmann/judgement</url>
+    </scm>
+
+    <properties>
+
+    </properties>
+
+    <subprojects>
+        <subproject>shared</subproject>
+        <subproject>persistence</subproject>
+        <subproject>rest</subproject>
+        <!--<subproject>app</subproject>-->
+    </subprojects>
+
+</project>
