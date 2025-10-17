@@ -12,11 +12,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 
 @DataJpaTest
-//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-//@TestPropertySource(properties = {
-//        "spring.datasource.url=jdbc:sqlite:target/memory.db:judgement?cache=shared",
-//        "spring.jpa.hibernate.ddl-auto=create-drop",
-//})
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@TestPropertySource(properties = {
+        "spring.datasource.url=jdbc:sqlite:target/memory.db:judgement?cache=shared",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+})
 public class RoleCodeRepositoryTest {
     private final RoleCodeRepository roleCodeRepository;
 
