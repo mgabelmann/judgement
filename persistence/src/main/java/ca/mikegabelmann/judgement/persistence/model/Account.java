@@ -64,20 +64,8 @@ public class Account extends AbstractAuditable {
                 + ", active='"
                 + active
                 + '\''
-                + ", createdBy='"
-                + createdBy
-                + '\''
-                + ", createdonDtm='"
-                + createdOn
-                + '\''
                 + ", email='"
                 + email
-                + '\''
-                + ", modifiedBy='"
-                + modifiedBy
-                + '\''
-                + ", modifiedonDtm='"
-                + modifiedOn
                 + '\''
                 + ", password='"
                 + password
@@ -87,6 +75,18 @@ public class Account extends AbstractAuditable {
                 + '\''
                 + ", username='"
                 + username
+                + '\''
+                + ", createdBy='"
+                + createdBy
+                + '\''
+                + ", createdonDtm='"
+                + createdOn
+                + '\''
+                + ", modifiedBy='"
+                + modifiedBy
+                + '\''
+                + ", modifiedonDtm='"
+                + modifiedOn
                 + '\''
                 + ", version='"
                 + version

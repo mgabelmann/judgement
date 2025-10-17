@@ -74,12 +74,11 @@ public class RoleCode implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("RoleCode{");
-        sb.append("active=").append(active);
-        sb.append(", id='").append(id).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append('}');
-        return sb.toString();
+        String sb = "RoleCode{" + "active=" + active +
+                ", id='" + id + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+        return sb;
     }
 
 }
