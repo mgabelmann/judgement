@@ -31,11 +31,11 @@ public class Account extends AbstractAuditable {
     private Boolean active;
 
     @Lob
-    @Column(name = "SALT", nullable = false, length = 16, columnDefinition = "BLOB(16)")
+    @Column(name = "SALT", nullable = false, length = 16, columnDefinition = "CLOB(16)")
     private byte[] salt;
 
     @Lob
-    @Column(name = "PASSWORD", nullable = false, length = 91, columnDefinition = "BLOB(91)")
+    @Column(name = "PASSWORD", nullable = false, length = 91, columnDefinition = "CLOB(91)")
     private byte[] password;
 
 
