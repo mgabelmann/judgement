@@ -18,7 +18,7 @@ public class JudgementApplication {
      */
     public static void main(final String[] args) {
         //change default application property name, useful for deploying to application container, instead of standalone
-        System.setProperty("spring.config.name", "application");
+        System.setProperty("spring.config.name", "judgement");
 
         SpringApplication.run(JudgementApplication.class, args);
     }

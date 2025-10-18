@@ -148,7 +148,7 @@
     </dependencies>
 
     <build>
-        <finalName>demo2</finalName>
+        <finalName>judgement</finalName>
 
         <plugins>
             <plugin>
@@ -183,7 +183,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>ca.mikegabelmann.demo2.Demo2Application</mainClass>
+                    <mainClass>ca.mikegabelmann.judgement.JudgementApplication</mainClass>
                     <layout>ZIP</layout>
                 </configuration>
                 <executions>
@@ -207,7 +207,7 @@
                         <configuration>
                             <target>
                                 <echo>unzip jar file</echo>
-                                <unzip src="target/demo2.jar" dest="target/exploded/"/>
+                                <unzip src="target/judgement.jar" dest="target/exploded/"/>
                             </target>
                         </configuration>
                         <goals>
