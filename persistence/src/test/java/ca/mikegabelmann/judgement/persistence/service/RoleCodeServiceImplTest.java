@@ -44,8 +44,8 @@ class RoleCodeServiceImplTest {
 
     @Test
     void findById() {
-        Mockito.when(roleCodeRepository.findById(roleCode1.getId())).thenReturn(Optional.of(roleCode1));
-        Optional<RoleCode> roleCode = roleCodeService.findById(roleCode1.getId());
+        Mockito.when(roleCodeRepository.findById(roleCode1.getCode())).thenReturn(Optional.of(roleCode1));
+        Optional<RoleCode> roleCode = roleCodeService.findById(roleCode1.getCode());
 
         Assertions.assertNotNull(roleCode);
         Assertions.assertTrue(roleCode.isPresent());

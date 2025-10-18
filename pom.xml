@@ -37,4 +37,38 @@
         <!--<subproject>app</subproject>-->
     </subprojects>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <!-- for unit testing -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${surefire-plugin.version}</version>
+                    <configuration>
+                        <skip>${maven.test.skip}</skip>
+                        <skipTests>${skipTests}</skipTests>
+                        <!-- Add annotation groups to include/exclude
+                            <groups></groups>
+                            <excludedGroups></excludedGroups>
+                        -->
+                        <includes>
+                            <include>**/*Test.java</include>
+                            <include>**/*TestCase.java</include>
+                            <include>**/*TestSuite.java</include>
+                        </includes>
+                        <!-- add mockito jar so we don't get a bunch of warnings during build -->
+                        <argLine>@{argLine} ${surefire-plugin.argLine} -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar -Xshare:off</argLine>
+                    </configuration>
+                    <dependencies>
+                        <!-- NOTE: if you include junit dependencies here, you may run into issues since the
+                                   surefire plugin imports it as well and there could be conflicts/version
+                                   incompatibilities.
+                        -->
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
 </project>

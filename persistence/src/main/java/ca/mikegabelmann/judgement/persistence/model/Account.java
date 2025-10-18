@@ -31,11 +31,11 @@ public class Account extends AbstractAuditable {
     private Boolean active;
 
     @Lob
-    @Column(name = "SALT", nullable = false, length = 16, columnDefinition = "CLOB(16)")
+    @Column(name = "SALT", nullable = false, length = 32, columnDefinition = "CLOB(32)")
     private byte[] salt;
 
     @Lob
-    @Column(name = "PASSWORD", nullable = false, length = 91, columnDefinition = "CLOB(91)")
+    @Column(name = "PASSWORD", nullable = false, length = 196, columnDefinition = "CLOB(196)")
     private byte[] password;
 
 
@@ -51,8 +51,6 @@ public class Account extends AbstractAuditable {
         this.salt = salt;
         this.username = username;
     }
-
-
 
     // OBJECT overrides
     @Override
@@ -127,4 +125,5 @@ public class Account extends AbstractAuditable {
         result = 31 * result + Objects.hashCode(version);
         return result;
     }
+
 }

@@ -8,12 +8,13 @@ import jakarta.persistence.Table;
 
 import java.io.Serializable;
 
+
 @Entity
 @Table(name = "ROLE_CODE")
 public class RoleCode implements Serializable {
     @Id
     @Column(name = "ID", nullable = false, length = 32, unique = true)
-    private String id;
+    private String code;
 
     @Column(name = "DESCRIPTION", nullable = false, length = 254)
     private String description;
@@ -27,10 +28,10 @@ public class RoleCode implements Serializable {
         ;
     }
 
-    public RoleCode(Boolean active, String description, String id) {
+    public RoleCode(Boolean active, String description, String code) {
         this.active = active;
         this.description = description;
-        this.id = id;
+        this.code = code;
     }
 
     public Boolean getActive() {
@@ -49,24 +50,24 @@ public class RoleCode implements Serializable {
         this.description = description;
     }
 
-    public String getId() {
-        return id;
+    public String getCode() {
+        return code;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     @Override
     public final boolean equals(Object o) {
         if (!(o instanceof RoleCode roleCode)) return false;
 
-        return id.equals(roleCode.id) && description.equals(roleCode.description) && active.equals(roleCode.active);
+        return code.equals(roleCode.code) && description.equals(roleCode.description) && active.equals(roleCode.active);
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
+        int result = code.hashCode();
         result = 31 * result + description.hashCode();
         result = 31 * result + active.hashCode();
         return result;
@@ -75,7 +76,7 @@ public class RoleCode implements Serializable {
     @Override
     public String toString() {
         String sb = "RoleCode{" + "active=" + active +
-                ", id='" + id + '\'' +
+                ", code='" + code + '\'' +
                 ", description='" + description + '\'' +
                 '}';
         return sb;

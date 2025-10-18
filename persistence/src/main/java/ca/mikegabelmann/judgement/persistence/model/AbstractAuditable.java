@@ -33,6 +33,7 @@ public abstract class AbstractAuditable implements Serializable {
     @Column(name = "VERSION", nullable = false)
     protected Long version;
 
+
     /** Constructor. */
     protected AbstractAuditable() {
         ;
