@@ -38,7 +38,7 @@ public class RoleCodeServiceImpl implements RoleCodeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<RoleCode> findActiveRoleCodes() {
+    public List<RoleCode> findActive() {
         return roleCodeRepository.findAllByActiveTrue();
     }
 

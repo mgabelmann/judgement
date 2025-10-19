@@ -10,8 +10,8 @@ import java.io.Serializable;
 
 
 @Entity
-@Table(name = "ROLE_CODE")
-public class RoleCode implements Serializable {
+@Table(name = "ACCOUNT_STATUS_CODE")
+public class AccountStatusCode implements Serializable {
     @Id
     @Column(name = "CODE", nullable = false, length = 32, unique = true)
     private String code;
@@ -24,11 +24,11 @@ public class RoleCode implements Serializable {
     private Boolean active;
 
 
-    protected RoleCode() {
+    protected AccountStatusCode() {
         ;
     }
 
-    public RoleCode(Boolean active, String label, String code) {
+    public AccountStatusCode(Boolean active, String label, String code) {
         this.active = active;
         this.label = label;
         this.code = code;
@@ -60,9 +60,9 @@ public class RoleCode implements Serializable {
 
     @Override
     public final boolean equals(Object o) {
-        if (!(o instanceof RoleCode roleCode)) return false;
+        if (!(o instanceof AccountStatusCode code)) return false;
 
-        return code.equals(roleCode.code) && label.equals(roleCode.label) && active.equals(roleCode.active);
+        return code.equals(code.code) && label.equals(code.label) && active.equals(code.active);
     }
 
     @Override
@@ -75,11 +75,10 @@ public class RoleCode implements Serializable {
 
     @Override
     public String toString() {
-        String sb = "RoleCode{" + "active=" + active +
+        String sb = "AccountStatusCode{" + "active=" + active +
                 ", code='" + code + '\'' +
                 ", label='" + label + '\'' +
                 '}';
         return sb;
     }
-
 }

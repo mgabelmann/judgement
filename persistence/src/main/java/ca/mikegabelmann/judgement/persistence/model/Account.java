@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+
 @Entity
 @Table(name = "ACCOUNT")
 public class Account extends AbstractAuditable {

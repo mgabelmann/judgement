@@ -14,23 +14,23 @@ public enum Role {
     CLIENT("Client"),
     ;
 
-    private final String descriptiion;
+    private final String label;
 
     /**
      * Constructor.
-     * @param description description
+     * @param label label
      */
-    Role(final String description) {
-        this.descriptiion = description;
+    Role(final String label) {
+        this.label = label;
     }
 
     public String getDescription() {
-        return descriptiion;
+        return label;
     }
 
     @Override
     public String toString() {
-        return descriptiion;
+        return label;
     }
 
 }

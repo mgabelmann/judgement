@@ -1,28 +1,28 @@
 package ca.mikegabelmann.judgement.persistence.service;
 
-import ca.mikegabelmann.judgement.persistence.model.RoleCode;
+import ca.mikegabelmann.judgement.persistence.model.AccountStatusCode;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RoleCodeService {
+public interface AccountStatusCodeService {
     /**
-     * Get all RoleCodes.
+     * Get all AccountStatusCode.
      * @return all records
      */
-    List<RoleCode> findAll();
+    List<AccountStatusCode> findAll();
 
     /**
      * Get record by its id.
      * @param id primary key
      * @return record
      */
-    Optional<RoleCode> findById(String id);
+    Optional<AccountStatusCode> findById(String id);
 
     /**
      * Find all active.
      * @return active records
      */
-    List<RoleCode> findActive();
+    List<AccountStatusCode> findActive();
 
 }
