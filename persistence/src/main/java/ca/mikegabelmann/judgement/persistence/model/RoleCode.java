@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Table(name = "ROLE_CODE")
 public class RoleCode implements Serializable {
     @Id
-    @Column(name = "ID", nullable = false, length = 32, unique = true)
+    @Column(name = "CODE", nullable = false, length = 32, unique = true)
     private String code;
 
     @Column(name = "DESCRIPTION", nullable = false, length = 254)

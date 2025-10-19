@@ -16,14 +16,19 @@ public class JudgementConfiguration {
     @Value("${judgement.security.pepper}")
     private String pepper;
 
-    public JudgementConfiguration(Environment environment) {
+
+    /**
+     * Constructor.
+     * @param environment environment
+     */
+    public JudgementConfiguration(final Environment environment) {
         this.environment = environment;
     }
 
     @PostConstruct
     public void postConstruct() {
-        if (pepper == null || pepper.equals("")) {
-            /* if pepper is null or empty than securing passwords hashes in the database will be compromised. It should
+        if (pepper == null || pepper.isEmpty()) {
+            /* if pepper is null or empty then securing passwords hashes in the database will be compromised. It should
              * not be set as a spring property. It should be securely stored and set as an environment variable, system
              * property, external config file not stored in repository with limited access, etc.
              */
