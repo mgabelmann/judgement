@@ -10,17 +10,18 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+
 @Service
 public class AccountStatusCodeServiceImpl implements AccountStatusCodeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountStatusCodeServiceImpl.class);
 
     private final AccountStatusCodeRepository accountStatusCodeRepository;
 
+
     @Autowired
     public AccountStatusCodeServiceImpl(AccountStatusCodeRepository accountStatusCodeRepository) {
         this.accountStatusCodeRepository = accountStatusCodeRepository;
     }
-
 
     @Override
     public List<AccountStatusCode> findAll() {

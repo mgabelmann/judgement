@@ -10,8 +10,8 @@ import java.util.UUID;
 
 
 /**
- * Audit fields are used by the application to track who/when an object
- * is created or modified. This could be a user or a system process.
+ * Audit fields are used by the application to track who/when an object is created or modified.
+ * This could be a user or a system process.
  * @author mgabelmann
  */
 @MappedSuperclass
@@ -41,17 +41,17 @@ public abstract class AbstractAuditable implements Serializable {
 
     /**
      * Constructor.
-     * @param createdBy created by
-     * @param modifiedBy modified by
      * @param createdOn created on
+     * @param createdBy created by
      * @param modifiedOn modified on
+     * @param modifiedBy modified by
      * @param version version
      */
-    public AbstractAuditable(final UUID createdBy, final UUID modifiedBy, final Instant createdOn, final Instant modifiedOn, final Long version) {
-        this.createdBy = createdBy;
-        this.modifiedBy = modifiedBy;
+    public AbstractAuditable(final UUID createdBy, final Instant createdOn, final UUID modifiedBy, final Instant modifiedOn, final Long version) {
         this.createdOn = createdOn;
         this.modifiedOn = modifiedOn;
+        this.createdBy = createdBy;
+        this.modifiedBy = modifiedBy;
         this.version = version;
     }
 

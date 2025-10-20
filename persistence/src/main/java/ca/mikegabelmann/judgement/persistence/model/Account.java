@@ -3,8 +3,11 @@ package ca.mikegabelmann.judgement.persistence.model;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -21,35 +24,113 @@ public class Account extends AbstractAuditable {
     @Column(name = "ACCOUNT_ID", nullable = false, unique = true)
     private UUID id;
 
+    /**
+     * Used for login purposes and verifying an account or password reset.
+     */
     @Column(name = "EMAIL", nullable = false, unique = true, length = 320)
     private String email;
 
+    /**
+     * Username is a unique id, that is used for display purposes only.
+     */
     @Column(name = "USERNAME", nullable = false, unique = true, length = 16)
     private String username;
 
+    /**
+     * Is the account active or inactive.
+     */
     @Convert(converter = BooleanConverter.class)
     @Column(name = "ACTIVE", nullable = false, length = 1)
     private Boolean active;
 
+    /**
+     * Used for password hashing. Every account has a random value.
+     */
     @Lob
     @Column(name = "SALT", nullable = false, length = 32, columnDefinition = "CLOB(32)")
     private byte[] salt;
 
+    /**
+     * This is a hashed password using a random 'salt' (1/account) and a 'pepper' (1/system).
+     */
     @Lob
     @Column(name = "PASSWORD", nullable = false, length = 196, columnDefinition = "CLOB(196)")
     private byte[] password;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ACCOUNT_STATUS", nullable = false)
+    private AccountStatusCode accountStatus;
 
+
+    /** No arg constructor for use by JPA. */
     protected Account() {
         super();
     }
 
-    public Account(UUID createdBy, UUID modifiedBy, Instant createdOn, Instant modifiedOn, Long version, Boolean active, String email, byte[] password, byte[] salt, String username) {
-        super(createdBy, modifiedBy, createdOn, modifiedOn, version);
+    public Account(UUID id, UUID createdBy, Instant createdOn, UUID modifiedBy, Instant modifiedOn, Long version, Boolean active, String email, byte[] password, byte[] salt, String username, AccountStatusCode accountStatus) {
+        super(createdBy, createdOn, modifiedBy, modifiedOn, version);
+        this.id = id;
         this.active = active;
         this.email = email;
         this.password = password;
         this.salt = salt;
+        this.username = username;
+        this.accountStatus = accountStatus;
+    }
+
+    public AccountStatusCode getAccountStatus() {
+        return accountStatus;
+    }
+
+    public void setAccountStatus(AccountStatusCode accountStatus) {
+        this.accountStatus = accountStatus;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public byte[] getPassword() {
+        return password;
+    }
+
+    public void setPassword(byte[] password) {
+        this.password = password;
+    }
+
+    public byte[] getSalt() {
+        return salt;
+    }
+
+    public void setSalt(byte[] salt) {
+        this.salt = salt;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
         this.username = username;
     }
 
@@ -74,6 +155,9 @@ public class Account extends AbstractAuditable {
                 + '\''
                 + ", username='"
                 + username
+                + '\''
+                + ", accountStatus='"
+                + accountStatus
                 + '\''
                 + ", createdBy='"
                 + createdBy
@@ -108,7 +192,9 @@ public class Account extends AbstractAuditable {
                 && Objects.equals(password, that.password)
                 && Objects.equals(salt, that.salt)
                 && Objects.equals(username, that.username)
-                && Objects.equals(version, that.version);
+                && Objects.equals(accountStatus, that.accountStatus)
+                && Objects.equals(version, that.version)
+                ;
     }
 
     @Override
@@ -124,6 +210,7 @@ public class Account extends AbstractAuditable {
         result = 31 * result + Objects.hashCode(salt);
         result = 31 * result + Objects.hashCode(username);
         result = 31 * result + Objects.hashCode(version);
+        result = 31 * result + Objects.hashCode(accountStatus);
         return result;
     }
 

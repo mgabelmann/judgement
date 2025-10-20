@@ -26,7 +26,7 @@ public class CodesRestController {
 
 
     @Autowired
-    public CodesRestController(AccountStatusCodeService accountStatusCodeService, RoleCodeService roleCodeService) {
+    public CodesRestController(final AccountStatusCodeService accountStatusCodeService, final RoleCodeService roleCodeService) {
         this.accountStatusCodeService = accountStatusCodeService;
         this.roleCodeService = roleCodeService;
     }

@@ -54,7 +54,7 @@ class RoleCodeServiceImplTest {
     @Test
     void findActiveRoleCodes() {
         Mockito.when(roleCodeRepository.findAllByActiveTrue()).thenReturn(Arrays.asList(roleCode1));
-        List<RoleCode> roleCodes = roleCodeService.findActiveRoleCodes();
+        List<RoleCode> roleCodes = roleCodeService.findActive();
 
         Assertions.assertNotNull(roleCodes);
         Assertions.assertEquals(1, roleCodes.size());
