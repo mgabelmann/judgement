@@ -16,7 +16,6 @@ import java.util.UUID;
  */
 @MappedSuperclass
 public abstract class AbstractAuditable implements Serializable {
-
     @Column(name = "CREATEDBY", nullable = false, updatable = false)
     protected UUID createdBy;
 
