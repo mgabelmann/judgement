@@ -26,7 +26,7 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
 
 
     @Autowired
-    public JudgementUserDetailsServiceImpl(AccountRepository accountRepository) {
+    public JudgementUserDetailsServiceImpl(final AccountRepository accountRepository) {
         this.accountRepository = accountRepository;
     }
 
@@ -37,6 +37,7 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
         if (account.isPresent()) {
             Account tmp = account.get();
             List<JudgementGrantedAuthority> grantedAuthorities = new ArrayList<>();
+            //TODO: load and add granted authorities
 
             return new JudgementUserDetails(tmp.getUsername(), new String(tmp.getPassword()), AccountStatus.getAccountStatus(tmp.getAccountStatus().getCode()), grantedAuthorities);
         }

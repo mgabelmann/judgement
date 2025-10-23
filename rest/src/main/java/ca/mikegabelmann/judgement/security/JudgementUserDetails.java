@@ -4,13 +4,18 @@ import ca.mikegabelmann.judgement.codes.AccountStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 
-public class JudgementUserDetails implements UserDetails {
+public class JudgementUserDetails implements UserDetails, Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private final String username;
     private String password;
     private final AccountStatus accountStatus;

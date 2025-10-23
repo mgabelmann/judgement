@@ -34,7 +34,6 @@ public class WebSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http, final JudgementUserDetailsServiceImpl userDetailsService, final PasswordEncoder passwordEncoder) throws Exception {
-
         AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
         authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
 

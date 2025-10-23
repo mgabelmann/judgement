@@ -3,10 +3,11 @@
 --ROLE_CODE
 INSERT INTO ROLE_CODE(code, label, active) VALUES ('SYSTEM', 'System', 'N');
 INSERT INTO ROLE_CODE(code, label, active) VALUES ('ADMINISTRATOR', 'Administrator', 'Y');
-INSERT INTO ROLE_CODE(code, label, active) VALUES ('PROJECT_ADMIN', 'Project Administrator', 'Y');
-INSERT INTO ROLE_CODE(code, label, active) VALUES ('PROJECT_JUDGE', 'Project Judge', 'Y');
-INSERT INTO ROLE_CODE(code, label, active) VALUES ('PROJECT_CLIENT', 'Project Client', 'Y');
-INSERT INTO ROLE_CODE(code, label, active) VALUES ('VIEWER', 'Viewer', 'Y');
+INSERT INTO ROLE_CODE(code, label, active) VALUES ('DEVELOPER', 'Developer', 'Y');
+INSERT INTO ROLE_CODE(code, label, active) VALUES ('TESTER', 'Tester', 'Y');
+INSERT INTO ROLE_CODE(code, label, active) VALUES ('USER', 'User', 'Y');
+--INSERT INTO ROLE_CODE(code, label, active) VALUES ('API_CLIENT', 'API CLient', 'Y');
+
 
 --ACCOUNT_STATUS_CODE
 INSERT INTO ACCOUNT_STATUS_CODE(code, label, active) VALUES ('NEW', 'New', 'Y');
@@ -16,6 +17,14 @@ INSERT INTO ACCOUNT_STATUS_CODE(code, label, active) VALUES ('INACTIVE', 'Inacti
 INSERT INTO ACCOUNT_STATUS_CODE(code, label, active) VALUES ('SUSPENDED', 'Suspended', 'Y');
 INSERT INTO ACCOUNT_STATUS_CODE(code, label, active) VALUES ('BLOCKED', 'Blocked', 'Y');
 INSERT INTO ACCOUNT_STATUS_CODE(code, label, active) VALUES ('PASSWORD_RESET', 'Password Reset', 'Y');
+
+
+--PROJECT_ROLE_CODE
+INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_OWNER', 'Project Owner', 'Y');
+INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_JUDGE', 'Project Judge', 'Y');
+INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_USER', 'Project User', 'Y');
+INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_VIEWER', 'Project Viewer', 'Y');
+
 
 --ACCOUNT
 INSERT INTO ACCOUNT(account_id, email, username, password, account_status, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'system', 'xxx', 'ACTIVE', 'system', 'system', datetime(), datetime(), 0);

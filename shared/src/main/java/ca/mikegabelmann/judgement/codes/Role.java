@@ -8,17 +8,15 @@ public enum Role {
     /** A role used to manage the application. Can do anything. */
     ADMINISTRATOR("Administrator"),
 
-    /** A role used to manage all projects. */
-    PROJECT_ADMIN("Project Administrator"),
+    DEVELOPER("Developer"),
 
-    /** A project user role with elevated privileges. */
-    PROJECT_JUDGE("Project Judge"),
-
-    /** A project user role with regular privileges. */
-    PROJECT_CLIENT("Project Client"),
+    TESTER("Tester"),
 
     /** A user with basic credentials (read-only). */
-    VIEWER("Viewer"),
+    USER("USER"),
+
+    /** REST client. */
+    //API_CLIENT("API Client"),
     ;
 
     private final String label;

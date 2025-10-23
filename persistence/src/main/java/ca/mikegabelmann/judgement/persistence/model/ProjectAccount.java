@@ -37,15 +37,15 @@ public class ProjectAccount implements Serializable {
     private Boolean active;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROLE_CODE", nullable = false)
-    private RoleCode role;
+    @JoinColumn(name = "PROJECT_ROLE_CODE", nullable = false)
+    private ProjectRoleCode projectRole;
 
     protected ProjectAccount() {}
 
-    public ProjectAccount(ProjectAccountId id, Boolean active, RoleCode role) {
+    public ProjectAccount(ProjectAccountId id, Boolean active, ProjectRoleCode projectRole) {
         this.id = id;
         this.active = active;
-        this.role = role;
+        this.projectRole = projectRole;
     }
 
     public Boolean getActive() {
@@ -64,19 +64,19 @@ public class ProjectAccount implements Serializable {
         this.id = id;
     }
 
-    public RoleCode getRole() {
-        return role;
+    public ProjectRoleCode getProjectRole() {
+        return projectRole;
     }
 
-    public void setRole(RoleCode role) {
-        this.role = role;
+    public void setProjectRole(ProjectRoleCode projectRole) {
+        this.projectRole = projectRole;
     }
 
     @Override
     public String toString() {
         return "ProjectAccount{" + "id=" + id +
                 ", active=" + active +
-                ", role=" + role +
+                ", projectRole=" + projectRole +
                 '}';
     }
 
