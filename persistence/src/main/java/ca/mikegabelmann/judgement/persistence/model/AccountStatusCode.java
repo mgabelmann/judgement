@@ -6,12 +6,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 
 @Entity
 @Table(name = "ACCOUNT_STATUS_CODE")
 public class AccountStatusCode implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @Column(name = "CODE", nullable = false, length = 32, unique = true)
     private String code;

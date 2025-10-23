@@ -2,16 +2,23 @@ package ca.mikegabelmann.judgement.codes;
 
 public enum Role {
 
-    SYSTEM("System Event"),
+    /** A role used by the system to do most actions (automated). */
+    SYSTEM("System"),
+
+    /** A role used to manage the application. Can do anything. */
     ADMINISTRATOR("Administrator"),
 
-    PROJECT_OWNER("Project Owner"),
-    //PROJECT_MANAGER("Project Manager"),
+    /** A role used to manage all projects. */
+    PROJECT_ADMIN("Project Administrator"),
 
+    /** A project user role with elevated privileges. */
     PROJECT_JUDGE("Project Judge"),
+
+    /** A project user role with regular privileges. */
     PROJECT_CLIENT("Project Client"),
 
-    CLIENT("Client"),
+    /** A user with basic credentials (read-only). */
+    VIEWER("Viewer"),
     ;
 
     private final String label;
@@ -31,6 +38,15 @@ public enum Role {
     @Override
     public String toString() {
         return label;
+    }
+
+    /**
+     * Get Role from given string.
+     * @param role role
+     * @return value
+     */
+    public static Role getRole(final String role) {
+        return Role.valueOf(role.toUpperCase());
     }
 
 }

@@ -9,6 +9,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
@@ -16,7 +18,10 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "ACCOUNT_ACTIVITY_LOG")
-public class AccountActivityLog {
+public class AccountActivityLog implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @UuidGenerator
     @Column(name = "ID", nullable = false)

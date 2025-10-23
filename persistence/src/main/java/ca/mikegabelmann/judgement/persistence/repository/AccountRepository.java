@@ -18,4 +18,11 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
      */
     Optional<Account> findByEmail(String email);
 
+    /**
+     * Get account by username.
+     * @param username username
+     * @return record
+     */
+    Optional<Account> findByUsername(String username);
+
 }

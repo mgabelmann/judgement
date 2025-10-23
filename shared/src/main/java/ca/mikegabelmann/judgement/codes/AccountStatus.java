@@ -25,6 +25,7 @@ public enum AccountStatus {
 
     private final String label;
 
+
     /**
      * Constructor.
      * @param label label
@@ -41,4 +42,14 @@ public enum AccountStatus {
     public String toString() {
         return label;
     }
+
+    /**
+     * Get AccountStatus from given string.
+     * @param status status
+     * @return value
+     */
+    public static AccountStatus getAccountStatus(final String status) {
+        return AccountStatus.valueOf(status.toUpperCase());
+    }
+
 }

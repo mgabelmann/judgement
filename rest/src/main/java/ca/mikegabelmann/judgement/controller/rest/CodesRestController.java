@@ -4,6 +4,7 @@ import ca.mikegabelmann.judgement.persistence.model.AccountStatusCode;
 import ca.mikegabelmann.judgement.persistence.model.RoleCode;
 import ca.mikegabelmann.judgement.persistence.service.AccountStatusCodeService;
 import ca.mikegabelmann.judgement.persistence.service.RoleCodeService;
+//import ca.mikegabelmann.judgement.security.preauthorize.role.RoleAdministrator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class CodesRestController {
         return ResponseEntity.ok(codes);
     }
 
+    //@RoleAdministrator
     @GetMapping(path = PATH_ACCOUNT_STATUS_CODES)
     public ResponseEntity<List<AccountStatusCode>> getActiveAccountStatusCodes() {
         List<AccountStatusCode> codes = accountStatusCodeService.findActive();
