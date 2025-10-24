@@ -1,5 +1,5 @@
 # Judgement
-Spring Boot, Spring Data, REST and SQLite
+Spring Boot, Spring Data, REST, H2 and SQLite
 
 ## Project Information
 Modularized Spring Boot project that uses Spring Data and Data REST.
@@ -15,6 +15,9 @@ Accessible endpoints using Data REST are:
 
     localhost:8080/persons
 
+### Database
+Application uses SQLite and testing uses H2 in-memory database. For local testing
+the database is recreated each time, but other environments use persisted.
 
 ## Local Usage
 You will need to have the _maven_pom_ project installed into your

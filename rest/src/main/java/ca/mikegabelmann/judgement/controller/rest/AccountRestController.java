@@ -27,6 +27,11 @@ public class AccountRestController {
         this.accountService = accountService;
     }
 
+    @RequestMapping(value = PATH_LOGIN, method = RequestMethod.POST)
+    public Account login(@RequestBody Account account) {
+        return null;
+    }
+
     @RequestMapping(value = PATH_REGISTER, method = RequestMethod.POST)
     public Account createAccount(@RequestBody Account account) {
         return null;

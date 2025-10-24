@@ -11,9 +11,10 @@ import java.util.List;
 public interface AccountStatusCodeRepository extends JpaRepository<AccountStatusCode, String> {
 
     /**
-     * Find all active codes.
-     * @return active codes
+     * Find all active or inactive codes.
+     * @param active active or inactive
+     * @return records
      */
-    List<AccountStatusCode> findAllByActiveTrue();
+    List<AccountStatusCode> findAllByActiveIs(Boolean active);
 
 }

@@ -10,9 +10,10 @@ import java.util.List;
 public interface ProjectRoleCodeRepository extends JpaRepository<ProjectRoleCode, String> {
 
     /**
-     * Find all active codes.
-     * @return active codes
+     * Find all active or inactive codes.
+     * @param active active or inactive
+     * @return records
      */
-    List<ProjectRoleCode> findAllByActiveTrue();
+    List<ProjectRoleCode> findAllByActiveIs(Boolean active);
 
 }

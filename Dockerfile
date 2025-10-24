@@ -15,4 +15,4 @@ COPY ${DEPENDENCY}/BOOT-INF/classes /app
 EXPOSE 8080
 
 #run the main class
-ENTRYPOINT ["java", "-cp", "app:app/lib/*", "ca.mikegabelmann.judgement.Application"]
+ENTRYPOINT ["java", "-cp", "app:app/lib/*", "ca.mikegabelmann.judgement.JudgementApplication"]

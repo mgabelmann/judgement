@@ -1,10 +1,9 @@
 package ca.mikegabelmann.judgement.controller.rest;
 
 import ca.mikegabelmann.judgement.persistence.model.AccountStatusCode;
+import ca.mikegabelmann.judgement.persistence.model.ProjectRoleCode;
 import ca.mikegabelmann.judgement.persistence.model.RoleCode;
-import ca.mikegabelmann.judgement.persistence.service.AccountStatusCodeService;
-import ca.mikegabelmann.judgement.persistence.service.RoleCodeService;
-//import ca.mikegabelmann.judgement.security.preauthorize.role.RoleAdministrator;
+import ca.mikegabelmann.judgement.persistence.service.CodesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,27 +20,31 @@ public class CodesRestController {
 
     public static final String PATH_ROLE_CODES = "/codes/rolecodes";
     public static final String PATH_ACCOUNT_STATUS_CODES = "/codes/accountstatuscodes";
+    public static final String PATH_PROJECT_ROLE_CODES = "/codes/projectrolecodes";
 
-    private final RoleCodeService roleCodeService;
-    private final AccountStatusCodeService accountStatusCodeService;
+    private final CodesService codesService;
 
 
     @Autowired
-    public CodesRestController(final AccountStatusCodeService accountStatusCodeService, final RoleCodeService roleCodeService) {
-        this.accountStatusCodeService = accountStatusCodeService;
-        this.roleCodeService = roleCodeService;
+    public CodesRestController(final CodesService codesService) {
+        this.codesService = codesService;
     }
 
     @GetMapping(path = PATH_ROLE_CODES)
     public ResponseEntity<List<RoleCode>> getActiveRoleCodes() {
-        List<RoleCode> codes = roleCodeService.findActive();
+        List<RoleCode> codes = codesService.findAllRoleByActiveIs(true);
         return ResponseEntity.ok(codes);
     }
 
-    //@RoleAdministrator
     @GetMapping(path = PATH_ACCOUNT_STATUS_CODES)
     public ResponseEntity<List<AccountStatusCode>> getActiveAccountStatusCodes() {
-        List<AccountStatusCode> codes = accountStatusCodeService.findActive();
+        List<AccountStatusCode> codes = codesService.findAllAccountStatusByActiveIs(true);
+        return ResponseEntity.ok(codes);
+    }
+
+    @GetMapping(path = PATH_PROJECT_ROLE_CODES)
+    public ResponseEntity<List<ProjectRoleCode>> getActiveProjectRoleCodes() {
+        List<ProjectRoleCode> codes = codesService.findAllProjectRoleByActiveIs(true);
         return ResponseEntity.ok(codes);
     }
 
