@@ -17,6 +17,8 @@ public class JudgementConfiguration {
     @Value("${judgement.security.pepper}")
     private String pepper;
 
+    @Value("${judgement.security.web.debug:false}")
+    private boolean securityDebug;
 
     /**
      * Constructor.
@@ -36,18 +38,26 @@ public class JudgementConfiguration {
             throw new NullPointerException("Pepper can not be null or empty. You MUST set this value, preferably as an environment variable.");
 
         } else if (isProfileActive("local")) {
-            LOGGER.info("security pepper=" + pepper);
+            LOGGER.warn("security pepper={}. NOTE: only displayed when using 'local' profile", pepper);
 
         } else {
-            LOGGER.info("pepper has been successfully set");
+            LOGGER.info("security pepper has been successfully set");
         }
-
     }
 
     public String getPepper() {
         return pepper;
     }
 
+    public boolean isSecurityDebug() {
+        return securityDebug;
+    }
+
+    /**
+     * Determine if given profile is active.
+     * @param profile profile to check
+     * @return true if active, false otherwise
+     */
     public boolean isProfileActive(final String profile) {
         for (String activeProfile : environment.getActiveProfiles()) {
             if (activeProfile.equalsIgnoreCase(profile)) {

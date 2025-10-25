@@ -4,6 +4,7 @@ import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.AccountActivityLog;
 import ca.mikegabelmann.judgement.persistence.model.AccountStatusCode;
 import ca.mikegabelmann.judgement.persistence.model.ModelTestFactory;
+import ca.mikegabelmann.judgement.persistence.model.RoleCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -23,20 +24,23 @@ import java.util.List;
 //})
 class AccountActivityLogRepositoryTest {
 
-    private AccountActivityLogRepository accountActivityLogRepository;
-    private AccountRepository accountRepository;
-    private AccountStatusCodeRepository accountStatusCodeRepository;
+    private final AccountActivityLogRepository accountActivityLogRepository;
+    private final AccountRepository accountRepository;
+    private final AccountStatusCodeRepository accountStatusCodeRepository;
+    private final RoleCodeRepository roleCodeRepository;
 
     private AccountStatusCode asc1;
+    private RoleCode rc1;
     private Account a1;
     private AccountActivityLog aal1;
 
     @SuppressWarnings("SpringJavaAutowiredMembersInspection")
     @Autowired
-    public AccountActivityLogRepositoryTest(AccountActivityLogRepository accountActivityLogRepository, AccountRepository accountRepository, AccountStatusCodeRepository accountStatusCodeRepository) {
+    public AccountActivityLogRepositoryTest(AccountActivityLogRepository accountActivityLogRepository, AccountRepository accountRepository, AccountStatusCodeRepository accountStatusCodeRepository, RoleCodeRepository roleCodeRepository) {
         this.accountActivityLogRepository = accountActivityLogRepository;
         this.accountRepository = accountRepository;
         this.accountStatusCodeRepository = accountStatusCodeRepository;
+        this.roleCodeRepository = roleCodeRepository;
     }
 
     @BeforeEach
@@ -44,7 +48,11 @@ class AccountActivityLogRepositoryTest {
         AccountStatusCode accountStatusCode = ModelTestFactory.createAccountStatusCode(true, "NEW");
         this.asc1 = this.accountStatusCodeRepository.save(accountStatusCode);
 
-        Account account = ModelTestFactory.createAccount(true, "test@dot.com", "test", asc1);
+        RoleCode roleCode = ModelTestFactory.createRoleCode(true, "ROLE_USER");
+        this.rc1 = roleCodeRepository.save(roleCode);
+
+
+        Account account = ModelTestFactory.createAccount(true, "test@dot.com", "test", asc1, rc1);
         this.a1 = this.accountRepository.save(account);
 
         AccountActivityLog accountActivityLog = ModelTestFactory.createAccountActivityLog("this is a test message 1", a1);

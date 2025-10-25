@@ -39,6 +39,7 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
             List<JudgementGrantedAuthority> grantedAuthorities = new ArrayList<>();
             //TODO: load and add granted authorities
 
+
             return new JudgementUserDetails(tmp.getUsername(), new String(tmp.getPassword()), AccountStatus.getAccountStatus(tmp.getAccountStatus().getCode()), grantedAuthorities);
         }
 

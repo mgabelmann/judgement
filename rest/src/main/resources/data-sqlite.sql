@@ -27,7 +27,7 @@ INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_VIEWER', 'Pr
 
 
 --ACCOUNT
-INSERT INTO ACCOUNT(account_id, email, username, password, account_status, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'system', 'xxx', 'ACTIVE', 'system', 'system', datetime(), datetime(), 0);
+INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'system', 'xxx', '', 'ACTIVE', 'SYSTEM','system', 'system', datetime(), datetime(), 0);
 
 
 --DON'T NEED A COMMIT STATEMENT

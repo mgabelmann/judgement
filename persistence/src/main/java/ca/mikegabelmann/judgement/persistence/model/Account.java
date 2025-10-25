@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -35,20 +36,6 @@ public class Account extends AbstractAuditable {
     @Column(name = "USERNAME", nullable = false, unique = true, length = 16)
     private String username;
 
-//    /**
-//     * Is the account active or inactive.
-//     */
-//    @Convert(converter = BooleanConverter.class)
-//    @Column(name = "ACTIVE", nullable = false, length = 1)
-//    private Boolean active;
-
-//    /**
-//     * Used for password hashing. Every account has a random value.
-//     */
-//    @Lob
-//    @Column(name = "SALT", nullable = false, length = 32, columnDefinition = "CLOB(32)")
-//    private byte[] salt;
-
     /**
      * This is a hashed password using a random 'salt' (1/account) and a 'pepper' (1/system).
      */
@@ -56,9 +43,20 @@ public class Account extends AbstractAuditable {
     @Column(name = "PASSWORD", nullable = false, length = 256, columnDefinition = "CLOB(196)")
     private byte[] password;
 
+    /**
+     * This 'salt' is prefixed to the users password to add some randomness, and stored so we can recreate the hashed
+     * value in password field.
+     */
+    @Column(name = "SALT", nullable = false, length = 16)
+    private String salt;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ACCOUNT_STATUS", nullable = false)
     private AccountStatusCode accountStatus;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ACCOUNT_ROLE", nullable = false)
+    private RoleCode accountRole;
 
 
     /** No arg constructor for use by JPA. */
@@ -66,15 +64,15 @@ public class Account extends AbstractAuditable {
         super();
     }
 
-    public Account(UUID id, String createdBy, Instant createdOn, String modifiedBy, Instant modifiedOn, Long version, Boolean active, String email, byte[] password, byte[] salt, String username, AccountStatusCode accountStatus) {
+    public Account(UUID id, String createdBy, Instant createdOn, String modifiedBy, Instant modifiedOn, Long version, String email, byte[] password, String salt, String username, AccountStatusCode accountStatus, RoleCode accountRole) {
         super(createdBy, createdOn, modifiedBy, modifiedOn, version);
         this.id = id;
-        //this.active = active;
         this.email = email;
         this.password = password;
-        //this.salt = salt;
+        this.salt = salt;
         this.username = username;
         this.accountStatus = accountStatus;
+        this.accountRole = accountRole;
     }
 
     public AccountStatusCode getAccountStatus() {
@@ -84,14 +82,6 @@ public class Account extends AbstractAuditable {
     public void setAccountStatus(AccountStatusCode accountStatus) {
         this.accountStatus = accountStatus;
     }
-
-//    public Boolean getActive() {
-//        return active;
-//    }
-//
-//    public void setActive(Boolean active) {
-//        this.active = active;
-//    }
 
     public String getEmail() {
         return email;
@@ -117,13 +107,21 @@ public class Account extends AbstractAuditable {
         this.password = password;
     }
 
-//    public byte[] getSalt() {
-//        return salt;
-//    }
-//
-//    public void setSalt(byte[] salt) {
-//        this.salt = salt;
-//    }
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
+    public RoleCode getAccountRole() {
+        return accountRole;
+    }
+
+    public void setAccountRole(RoleCode accountRole) {
+        this.accountRole = accountRole;
+    }
 
     public String getUsername() {
         return username;
@@ -140,23 +138,23 @@ public class Account extends AbstractAuditable {
                 + "id='"
                 + id
                 + '\''
-//                + ", active='"
-//                + active
-//                + '\''
                 + ", email='"
                 + email
+                + '\''
+                + ", username='"
+                + username
                 + '\''
                 + ", password='"
                 + password
                 + '\''
-//                + ", salt='"
-//                + salt
-//                + '\''
-                + ", username='"
-                + username
+                + ", salt='"
+                + salt
                 + '\''
                 + ", accountStatus='"
                 + accountStatus
+                + '\''
+                + ", accountRole='"
+                + accountRole
                 + '\''
                 + super.toString() +
                 + '}';
@@ -168,16 +166,16 @@ public class Account extends AbstractAuditable {
         if (!(o instanceof Account)) return false;
         Account that = (Account) o;
         return Objects.equals(id, that.id)
-                //&& Objects.equals(active, that.active)
                 && Objects.equals(createdBy, that.createdBy)
                 && Objects.equals(createdOn, that.createdOn)
                 && Objects.equals(email, that.email)
                 && Objects.equals(modifiedBy, that.modifiedBy)
                 && Objects.equals(modifiedOn, that.modifiedOn)
-                && Objects.equals(password, that.password)
-                //&& Objects.equals(salt, that.salt)
+                && Arrays.equals(password, that.password)
+                && Objects.equals(salt, that.salt)
                 && Objects.equals(username, that.username)
                 && Objects.equals(accountStatus, that.accountStatus)
+                && Objects.equals(accountRole, that.accountRole)
                 && Objects.equals(version, that.version)
                 ;
     }
@@ -185,17 +183,17 @@ public class Account extends AbstractAuditable {
     @Override
     public int hashCode() {
         int result = Objects.hashCode(id);
-        //result = 31 * result + Objects.hashCode(active);
         result = 31 * result + Objects.hashCode(createdBy);
         result = 31 * result + Objects.hashCode(createdOn);
         result = 31 * result + Objects.hashCode(email);
         result = 31 * result + Objects.hashCode(modifiedBy);
         result = 31 * result + Objects.hashCode(modifiedOn);
-        result = 31 * result + Objects.hashCode(password);
-        //result = 31 * result + Objects.hashCode(salt);
+        result = 31 * result + Arrays.hashCode(password);
+        result = 31 * result + Objects.hashCode(salt);
         result = 31 * result + Objects.hashCode(username);
         result = 31 * result + Objects.hashCode(version);
         result = 31 * result + Objects.hashCode(accountStatus);
+        result = 31 * result + Objects.hashCode(accountRole);
 
         return result;
     }
