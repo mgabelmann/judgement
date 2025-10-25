@@ -23,9 +23,17 @@ public class ProjectAccountId implements Serializable {
         super();
     }
 
-    public ProjectAccountId(UUID projectId, UUID accountId) {
+    public ProjectAccountId(final UUID projectId, final UUID accountId) {
         this.projectId = projectId;
         this.accountId = accountId;
+    }
+
+    public UUID getAccountId() {
+        return accountId;
+    }
+
+    public UUID getProjectId() {
+        return projectId;
     }
 
     @Override

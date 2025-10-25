@@ -11,12 +11,12 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="ca.mikegabelmann.judgement" level="DEBUG" additivity="false">
+        <Logger name="ca.mikegabelmann.judgement" level="TRACE" additivity="false">
             <AppenderRef ref="LogToFile"/>
             <AppenderRef ref="LogToConsole"/>
         </Logger>
 
-        <Logger name="org.springframework.boot" level="ERROR" additivity="false">
+        <Logger name="org.springframework.boot" level="INFO" additivity="false">
             <AppenderRef ref="LogToConsole"/>
         </Logger>
 

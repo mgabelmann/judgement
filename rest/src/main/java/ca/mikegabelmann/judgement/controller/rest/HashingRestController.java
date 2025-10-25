@@ -42,7 +42,8 @@ public class HashingRestController {
 
         LOGGER.info("password={}, salt={}, hash={}", password, salt, hashedPassword);
 
-        return ResponseEntity.ok(new HashResponse(algorithmName, WebSecurityConfiguration.urlEncode(hashedPassword), iterations, WebSecurityConfiguration.urlEncode(salt), saltLength, secret));
+        //return ResponseEntity.ok(new HashResponse(algorithmName, WebSecurityConfiguration.urlEncode(hashedPassword), iterations, WebSecurityConfiguration.urlEncode(salt), saltLength, secret));
+        return ResponseEntity.ok(new HashResponse(algorithmName, hashedPassword, iterations, salt, saltLength, secret));
     }
 
     @GetMapping(path = "codes/verifypassword")

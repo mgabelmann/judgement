@@ -39,9 +39,8 @@ public class Account extends AbstractAuditable {
     /**
      * This is a hashed password using a random 'salt' (1/account) and a 'pepper' (1/system).
      */
-    @Lob
-    @Column(name = "PASSWORD", nullable = false, length = 256, columnDefinition = "CLOB(196)")
-    private byte[] password;
+    @Column(name = "PASSWORD", nullable = false, length = 256)
+    private String password;
 
     /**
      * This 'salt' is prefixed to the users password to add some randomness, and stored so we can recreate the hashed
@@ -64,7 +63,7 @@ public class Account extends AbstractAuditable {
         super();
     }
 
-    public Account(UUID id, String createdBy, Instant createdOn, String modifiedBy, Instant modifiedOn, Long version, String email, byte[] password, String salt, String username, AccountStatusCode accountStatus, RoleCode accountRole) {
+    public Account(UUID id, String createdBy, Instant createdOn, String modifiedBy, Instant modifiedOn, Long version, String email, String password, String salt, String username, AccountStatusCode accountStatus, RoleCode accountRole) {
         super(createdBy, createdOn, modifiedBy, modifiedOn, version);
         this.id = id;
         this.email = email;
@@ -99,11 +98,11 @@ public class Account extends AbstractAuditable {
         this.id = id;
     }
 
-    public byte[] getPassword() {
+    public String getPassword() {
         return password;
     }
 
-    public void setPassword(byte[] password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
@@ -171,7 +170,7 @@ public class Account extends AbstractAuditable {
                 && Objects.equals(email, that.email)
                 && Objects.equals(modifiedBy, that.modifiedBy)
                 && Objects.equals(modifiedOn, that.modifiedOn)
-                && Arrays.equals(password, that.password)
+                && Objects.equals(password, that.password)
                 && Objects.equals(salt, that.salt)
                 && Objects.equals(username, that.username)
                 && Objects.equals(accountStatus, that.accountStatus)
@@ -188,7 +187,7 @@ public class Account extends AbstractAuditable {
         result = 31 * result + Objects.hashCode(email);
         result = 31 * result + Objects.hashCode(modifiedBy);
         result = 31 * result + Objects.hashCode(modifiedOn);
-        result = 31 * result + Arrays.hashCode(password);
+        result = 31 * result + Objects.hashCode(password);
         result = 31 * result + Objects.hashCode(salt);
         result = 31 * result + Objects.hashCode(username);
         result = 31 * result + Objects.hashCode(version);

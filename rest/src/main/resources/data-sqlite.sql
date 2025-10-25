@@ -27,7 +27,19 @@ INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_VIEWER', 'Pr
 
 
 --ACCOUNT
-INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'system', 'xxx', '', 'ACTIVE', 'SYSTEM','system', 'system', datetime(), datetime(), 0);
+INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'SYSTEM', '', '', 'ACTIVE', 'SYSTEM','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
+/*
+{
+    "secret": "XXX",
+    "saltLength": 16,
+    "iterations": 310000,
+    "algorithm": "PBKDF2WithHmacSHA256",
+    "salt": "QkhT97vlBUo=",
+    "hashedPassword": "sW45Y1AYiyBba/BSdjrCzE30hfGwuOsucLGq4qwsvnz5zACvZLGicCuJQt/HUIHJ"
+}
+ */
+INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('41858569-dca9-43a2-8227-d3dbdefc7398', 'admin@test.com', 'ADMIN', 'sW45Y1AYiyBba/BSdjrCzE30hfGwuOsucLGq4qwsvnz5zACvZLGicCuJQt/HUIHJ', 'QkhT97vlBUo=', 'ACTIVE', 'ADMINISTRATOR','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
+
 
 
 --DON'T NEED A COMMIT STATEMENT

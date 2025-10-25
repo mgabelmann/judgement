@@ -8,19 +8,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -44,26 +43,22 @@ public class WebSecurityConfiguration {
     private JudgementConfiguration judgementConfiguration;
 
     @Bean
-    public UserDetailsService judgementUserDetailsService(JudgementUserDetailsServiceImpl judgementUserDetailsService) {
-        return judgementUserDetailsService;
-    }
-
-    @Bean
-    public SecurityFilterChain filterChain(final HttpSecurity http, final JudgementUserDetailsServiceImpl userDetailsService, final PasswordEncoder passwordEncoder) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
-
-        AuthenticationManager authenticationManager = authenticationManagerBuilder.build();
+    public SecurityFilterChain securityFilterChain(
+            final HttpSecurity http,
+            final AuthenticationManager customAuthenticationManager
+            ) throws Exception {
 
         http
-            .csrf(Customizer.withDefaults())
-            .formLogin((form) -> form.loginPage("/login").permitAll())
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/actuator/**").hasRole("ADMINISTRATOR")
                 .requestMatchers("/codes/**").permitAll()
-            .anyRequest().authenticated())
+                .requestMatchers("/login").permitAll()
+                .requestMatchers("/helloworld").permitAll()
+                .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults())
-            .authenticationManager(authenticationManager)
+            //.formLogin(Customizer.withDefaults())
+            .authenticationManager(customAuthenticationManager)
             .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll())
         ;
@@ -72,19 +67,27 @@ public class WebSecurityConfiguration {
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        boolean securityDebug = judgementConfiguration.isSecurityDebug();
-        return web -> web.debug(securityDebug).ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico");
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder() {
-        //return Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8();
-
         String secret = judgementConfiguration.getPepper();
         Pbkdf2PasswordEncoder encoder = new Pbkdf2PasswordEncoder(secret, DEFAULT_SALT_LENGTH, DEFAULT_ITERATIONS, ALGORITHM);
         encoder.setEncodeHashAsBase64(true);
         return encoder;
+    }
+
+    @Bean
+    public AuthenticationManager customAuthenticationManager(final JudgementUserDetailsServiceImpl userDetailsService, final PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+
+        ProviderManager providerManager = new ProviderManager(authenticationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+        return providerManager;
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        boolean securityDebug = judgementConfiguration.isSecurityDebug();
+        return web -> web.debug(securityDebug).ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico");
     }
 
     /**

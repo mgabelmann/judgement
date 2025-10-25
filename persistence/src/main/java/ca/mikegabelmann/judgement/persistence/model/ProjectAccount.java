@@ -72,9 +72,26 @@ public class ProjectAccount implements Serializable {
         this.projectRole = projectRole;
     }
 
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
     @Override
     public String toString() {
-        return "ProjectAccount{" + "id=" + id +
+        return "ProjectAccount{" +
+                "id=" + id +
                 ", active=" + active +
                 ", projectRole=" + projectRole +
                 '}';

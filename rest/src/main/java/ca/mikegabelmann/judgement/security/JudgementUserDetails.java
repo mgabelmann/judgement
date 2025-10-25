@@ -18,6 +18,7 @@ public class JudgementUserDetails implements UserDetails, Serializable {
 
     private final String username;
     private String password;
+    private String salt;
     private final AccountStatus accountStatus;
     private final Set<JudgementGrantedAuthority> authorities;
 
@@ -29,9 +30,10 @@ public class JudgementUserDetails implements UserDetails, Serializable {
      * @param accountStatus
      * @param authorities
      */
-    public JudgementUserDetails(String username, String password, AccountStatus accountStatus, List<JudgementGrantedAuthority> authorities) {
+    public JudgementUserDetails(String username, String password, String salt, AccountStatus accountStatus, List<JudgementGrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
+        this.salt = salt;
         this.accountStatus = accountStatus;
         this.authorities = new TreeSet<>(authorities);
     }
@@ -53,6 +55,14 @@ public class JudgementUserDetails implements UserDetails, Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 
     @Override
@@ -88,6 +98,7 @@ public class JudgementUserDetails implements UserDetails, Serializable {
                 "accountStatus=" + accountStatus +
                 ", username='" + username + '\'' +
                 ", password='XXX'" +
+                ", salt='YYY'" +
                 ", authorities=" + authorities +
                 '}';
     }

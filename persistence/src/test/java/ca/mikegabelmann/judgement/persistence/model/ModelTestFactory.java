@@ -18,7 +18,7 @@ public class ModelTestFactory {
 
     public static Account createAccount(boolean active, String email, String username, AccountStatusCode status, RoleCode role) {
         Instant now = Instant.now();
-        return new Account(null, username, now, username, now, 0L, email, "abcdef".getBytes(), "12345678", username, status, role);
+        return new Account(null, username, now, username, now, 0L, email, "abcdef", "12345678", username, status, role);
     }
 
     public static AccountActivityLog createAccountActivityLog(String message, Account account) {

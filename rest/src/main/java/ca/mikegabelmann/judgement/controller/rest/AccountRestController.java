@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountRestController.class);
 
-    public static final String PATH_LOGIN = "/login";
+//    public static final String PATH_LOGIN = "/login";
     public static final String PATH_LOGOUT = "/logout";
     public static final String PATH_REGISTER = "/register";
     public static final String PATH_RESET = "/reset";
@@ -27,10 +27,10 @@ public class AccountRestController {
         this.accountService = accountService;
     }
 
-    @RequestMapping(value = PATH_LOGIN, method = RequestMethod.POST)
-    public Account login(@RequestBody Account account) {
-        return null;
-    }
+//    @RequestMapping(value = PATH_LOGIN, method = RequestMethod.POST)
+//    public Account login(@RequestBody Account account) {
+//        return null;
+//    }
 
     @RequestMapping(value = PATH_REGISTER, method = RequestMethod.POST)
     public Account createAccount(@RequestBody Account account) {

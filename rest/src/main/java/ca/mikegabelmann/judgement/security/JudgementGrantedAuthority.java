@@ -23,6 +23,18 @@ public class JudgementGrantedAuthority implements GrantedAuthority, Comparable<J
         this.role = role;
     }
 
+    /**
+     * Constructor.
+     * @param projectName project name
+     * @param projectRole project role
+     */
+    public JudgementGrantedAuthority(final String projectName, final String projectRole) {
+        Assert.hasText(projectName, "projectName must not be empty");
+        Assert.hasText(projectRole, "projectRole must not be empty");
+
+        this.role = projectName + ":" + projectRole;
+    }
+
     @Override
     public String getAuthority() {
         return this.role;
