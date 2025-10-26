@@ -95,7 +95,7 @@ public class JudgementUserDetails implements UserDetails, Serializable {
     @Override
     public String toString() {
         return "JudgementUserDetails{" +
-                "accountStatus=" + accountStatus +
+                "accountStatus=" + accountStatus.name() +
                 ", username='" + username + '\'' +
                 ", password='XXX'" +
                 ", salt='YYY'" +

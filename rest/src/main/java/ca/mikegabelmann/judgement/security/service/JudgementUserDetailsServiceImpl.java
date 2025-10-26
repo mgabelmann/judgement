@@ -10,6 +10,7 @@ import ca.mikegabelmann.judgement.security.JudgementUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,14 +40,31 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
         Optional<Account> account = accountRepository.findByUsername(username);
 
         if (account.isPresent()) {
+            LOGGER.trace("found account for user {}", username);
+
             Account tmp = account.get();
+            AccountStatus accountStatus = AccountStatus.getAccountStatus(tmp.getAccountStatus().getCode());
+
+            //Check account status
+            if (accountStatus.equals(AccountStatus.BLOCKED)) {
+                throw new DisabledException("Account is blocked");
+
+            } else if (accountStatus.equals(AccountStatus.SUSPENDED)) {
+                throw new DisabledException("Account is suspended");
+
+            } else if (accountStatus.equals(AccountStatus.INACTIVE)) {
+                throw new DisabledException("Account is inactive");
+            }
+
+            //TODO: handle other statuses that require it
+
             List<JudgementGrantedAuthority> grantedAuthorities = new ArrayList<>();
 
             {
-                JudgementGrantedAuthority role = new JudgementGrantedAuthority(tmp.getAccountRole().getCode());
+                JudgementGrantedAuthority role = new JudgementGrantedAuthority("ROLE_" + tmp.getAccountRole().getCode());
                 grantedAuthorities.add(role);
 
-                LOGGER.trace("user={}, added role:{}", username, role);
+                LOGGER.trace("user={}, added role: {}", username, role);
             }
 
             List<ProjectAccount> projectAccounts = projectAccountRepository.findAllByAccountIs(tmp);
@@ -54,7 +72,7 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
                 JudgementGrantedAuthority authority = new JudgementGrantedAuthority(projectAccount.getProject().getProjectName(), projectAccount.getProjectRole().getCode());
                 grantedAuthorities.add(authority);
 
-                LOGGER.trace("user={}, added authority:{}", username, authority);
+                LOGGER.trace("user={}, added authority: {}", username, authority);
             }
 
             return new JudgementUserDetails(tmp.getUsername(), tmp.getPassword(), tmp.getSalt(), AccountStatus.getAccountStatus(tmp.getAccountStatus().getCode()), grantedAuthorities);

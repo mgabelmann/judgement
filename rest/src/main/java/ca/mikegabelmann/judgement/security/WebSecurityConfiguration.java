@@ -1,15 +1,11 @@
 package ca.mikegabelmann.judgement.security;
 
 import ca.mikegabelmann.judgement.controller.config.JudgementConfiguration;
-import ca.mikegabelmann.judgement.security.service.JudgementUserDetailsServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,22 +39,18 @@ public class WebSecurityConfiguration {
     private JudgementConfiguration judgementConfiguration;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            final HttpSecurity http,
-            final AuthenticationManager customAuthenticationManager
-            ) throws Exception {
-
+    public SecurityFilterChain securityFilterChain(final HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/api/actuator/**").hasRole("ADMINISTRATOR")
+                .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
                 .requestMatchers("/codes/**").permitAll()
                 .requestMatchers("/login").permitAll()
-                .requestMatchers("/helloworld").permitAll()
                 .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults())
             //.formLogin(Customizer.withDefaults())
-            .authenticationManager(customAuthenticationManager)
+            //.authenticationManager(customAuthenticationManager)
             .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .logout((logout) -> logout.logoutSuccessUrl("/logout").permitAll())
         ;
@@ -74,21 +66,21 @@ public class WebSecurityConfiguration {
         return encoder;
     }
 
-    @Bean
-    public AuthenticationManager customAuthenticationManager(final JudgementUserDetailsServiceImpl userDetailsService, final PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
+//    @Bean
+//    public AuthenticationManager customAuthenticationManager(final JudgementUserDetailsServiceImpl userDetailsService, final PasswordEncoder passwordEncoder) {
+//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+//        authenticationProvider.setPasswordEncoder(passwordEncoder);
+//
+//        ProviderManager providerManager = new ProviderManager(authenticationProvider);
+//        providerManager.setEraseCredentialsAfterAuthentication(false);
+//        return providerManager;
+//    }
 
-        ProviderManager providerManager = new ProviderManager(authenticationProvider);
-        providerManager.setEraseCredentialsAfterAuthentication(false);
-        return providerManager;
-    }
-
-    @Bean
-    public WebSecurityCustomizer webSecurityCustomizer() {
-        boolean securityDebug = judgementConfiguration.isSecurityDebug();
-        return web -> web.debug(securityDebug).ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico");
-    }
+//    @Bean
+//    public WebSecurityCustomizer webSecurityCustomizer() {
+//        boolean securityDebug = judgementConfiguration.isSecurityDebug();
+//        return web -> web.debug(securityDebug).ignoring().requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico");
+//    }
 
     /**
      * Get a random 'salt' for encryption purposes.

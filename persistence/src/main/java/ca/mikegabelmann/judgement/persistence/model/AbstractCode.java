@@ -54,10 +54,10 @@ public abstract class AbstractCode {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof AbstractCode code)) return false;
+    public final boolean equals(Object o) {
+        if (!(o instanceof AbstractCode that)) return false;
 
-        return code.equals(code.code) && label.equals(code.label) && active.equals(code.active);
+        return code.equals(that.code) && label.equals(that.label) && active.equals(that.active);
     }
 
     @Override
