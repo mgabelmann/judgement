@@ -27,16 +27,16 @@ public class HashingRestController {
     @GetMapping(path = "/codes/hashpassword")
     public ResponseEntity<HashResponse> hashPassword(@RequestParam(name = "password") String password) {
         String secret = judgementConfiguration.getPepper();
-        int saltLength = WebSecurityConfiguration.DEFAULT_SALT_LENGTH;
-        int iterations = WebSecurityConfiguration.DEFAULT_ITERATIONS;
-        String algorithmName = WebSecurityConfiguration.ALGORITHM.name();
+        int saltLength = 16;
+        int iterations = 2;
+        String algorithmName = WebSecurityConfiguration.DEFAULT_ENCODING_ID;
 
         /* Generate a random salt that we store in the DB (1/password). The password is stored as a hash,
          * adding a random salt helps to reduce hash collisions
          */
-        String salt = WebSecurityConfiguration.getSalt(WebSecurityConfiguration.DEFAULT_PASSWORD_PREFIX_LENGTH);
+        //String salt = WebSecurityConfiguration.getRandomSalt(WebSecurityConfiguration.DEFAULT_PASSWORD_PREFIX_LENGTH);
+        String salt = "";
         String hashedPassword = passwordEncoder.encode(salt + password);
-        //String hashedPassword = passwordEncoder.encode(password);
 
         LOGGER.info("password={}, salt={}, hash={}", password, salt, hashedPassword);
 

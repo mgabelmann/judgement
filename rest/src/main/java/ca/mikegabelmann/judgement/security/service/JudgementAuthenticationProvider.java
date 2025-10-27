@@ -12,27 +12,28 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 @Service
-public class JudgementAuthenticationProviderServiceImpl implements AuthenticationProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JudgementAuthenticationProviderServiceImpl.class);
+public class JudgementAuthenticationProvider implements AuthenticationProvider {
+//public class JudgementAuthenticationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JudgementAuthenticationProvider.class);
 
     private final PasswordEncoder passwordEncoder;
-    private final JudgementUserDetailsServiceImpl  judgementUserDetailsServiceImpl;
+    private final JudgementUserDetailsService judgementUserDetailsService;
 
     @Autowired
-    public JudgementAuthenticationProviderServiceImpl(final JudgementUserDetailsServiceImpl judgementUserDetailsServiceImpl, final PasswordEncoder passwordEncoder) {
-        this.judgementUserDetailsServiceImpl = judgementUserDetailsServiceImpl;
+    public JudgementAuthenticationProvider(final JudgementUserDetailsService judgementUserDetailsService, final PasswordEncoder passwordEncoder) {
+        this.judgementUserDetailsService = judgementUserDetailsService;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Override
+    //@Override
     public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
         String username = authentication.getPrincipal().toString();
 
         try {
             //may throw a UsernameNotFoundException if account not found
-            JudgementUserDetails judgementUserDetails = (JudgementUserDetails) judgementUserDetailsServiceImpl.loadUserByUsername(username);
+            JudgementUserDetails judgementUserDetails = (JudgementUserDetails) judgementUserDetailsService.loadUserByUsername(username);
 
             LOGGER.info("userdetails: {}", judgementUserDetails);
 
@@ -54,7 +55,7 @@ public class JudgementAuthenticationProviderServiceImpl implements Authenticatio
         }
     }
 
-    @Override
+    //@Override
     public boolean supports(Class<?> authentication) {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }

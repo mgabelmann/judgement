@@ -22,15 +22,15 @@ import java.util.Optional;
 
 
 @Service
-public class JudgementUserDetailsServiceImpl implements UserDetailsService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JudgementUserDetailsServiceImpl.class);
+public class JudgementUserDetailsService implements UserDetailsService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(JudgementUserDetailsService.class);
 
     private final AccountRepository accountRepository;
     private final ProjectAccountRepository projectAccountRepository;
 
 
     @Autowired
-    public JudgementUserDetailsServiceImpl(AccountRepository accountRepository, ProjectAccountRepository projectAccountRepository) {
+    public JudgementUserDetailsService(final AccountRepository accountRepository, final ProjectAccountRepository projectAccountRepository) {
         this.accountRepository = accountRepository;
         this.projectAccountRepository = projectAccountRepository;
     }
@@ -47,13 +47,13 @@ public class JudgementUserDetailsServiceImpl implements UserDetailsService {
 
             //Check account status
             if (accountStatus.equals(AccountStatus.BLOCKED)) {
-                throw new DisabledException("Account is blocked");
+                throw new DisabledException("Account " + username + " is blocked");
 
             } else if (accountStatus.equals(AccountStatus.SUSPENDED)) {
-                throw new DisabledException("Account is suspended");
+                throw new DisabledException("Account " + username + " is suspended");
 
             } else if (accountStatus.equals(AccountStatus.INACTIVE)) {
-                throw new DisabledException("Account is inactive");
+                throw new DisabledException("Account " + username + " is inactive");
             }
 
             //TODO: handle other statuses that require it

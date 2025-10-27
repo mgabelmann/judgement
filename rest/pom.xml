@@ -117,6 +117,13 @@
             <scope>compile</scope>
         </dependency>
 
+        <!-- NOTE: required for argon2 password encoder -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.82</version>
+        </dependency>
+
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
