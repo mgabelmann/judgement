@@ -1,6 +1,5 @@
-package ca.mikegabelmann.judgement.security.service;
+package ca.mikegabelmann.judgement.security.auth;
 
-import ca.mikegabelmann.judgement.security.JudgementUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class JudgementAuthenticationProvider implements AuthenticationProvider {
 
             if (passwordEncoder.matches(password, hashedPassword)) {
                 //TODO: log success to AccountActivityLog
-                return UsernamePasswordAuthenticationToken.authenticated(username, hashedPassword, judgementUserDetails.getAuthorities());
+                return UsernamePasswordAuthenticationToken.authenticated(judgementUserDetails, hashedPassword, judgementUserDetails.getAuthorities());
 
             } else {
                 throw new BadCredentialsException("Invalid credentials for " + username);

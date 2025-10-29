@@ -1,12 +1,10 @@
-package ca.mikegabelmann.judgement.security.service;
+package ca.mikegabelmann.judgement.security.auth;
 
 import ca.mikegabelmann.judgement.codes.AccountStatus;
 import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.ProjectAccount;
 import ca.mikegabelmann.judgement.persistence.repository.AccountRepository;
 import ca.mikegabelmann.judgement.persistence.repository.ProjectAccountRepository;
-import ca.mikegabelmann.judgement.security.JudgementGrantedAuthority;
-import ca.mikegabelmann.judgement.security.JudgementUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +14,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 
 @Service
@@ -58,10 +57,10 @@ public class JudgementUserDetailsService implements UserDetailsService {
 
             //TODO: handle other statuses that require it
 
-            List<JudgementGrantedAuthority> grantedAuthorities = new ArrayList<>();
+            Set<JudgementGrantedAuthority> grantedAuthorities = new TreeSet<>();
 
             {
-                JudgementGrantedAuthority role = new JudgementGrantedAuthority("ROLE_" + tmp.getAccountRole().getCode());
+                JudgementGrantedAuthority role = JudgementGrantedAuthority.createRole(tmp.getAccountRole().getCode());
                 grantedAuthorities.add(role);
 
                 LOGGER.trace("user={}, added role: {}", username, role);
@@ -69,7 +68,7 @@ public class JudgementUserDetailsService implements UserDetailsService {
 
             List<ProjectAccount> projectAccounts = projectAccountRepository.findAllByAccountIs(tmp);
             for (ProjectAccount projectAccount : projectAccounts) {
-                JudgementGrantedAuthority authority = new JudgementGrantedAuthority(projectAccount.getProject().getProjectName(), projectAccount.getProjectRole().getCode());
+                JudgementGrantedAuthority authority = JudgementGrantedAuthority.createProjectAuthority(projectAccount.getProject().getProjectName(), projectAccount.getProjectRole().getCode());
                 grantedAuthorities.add(authority);
 
                 LOGGER.trace("user={}, added authority: {}", username, authority);

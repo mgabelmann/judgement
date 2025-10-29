@@ -1,40 +1,31 @@
-package ca.mikegabelmann.judgement.security;
+package ca.mikegabelmann.judgement.security.config;
 
 import ca.mikegabelmann.judgement.controller.config.JudgementConfiguration;
-import ca.mikegabelmann.judgement.security.service.JudgementAuthenticationProvider;
-import ca.mikegabelmann.judgement.security.service.JudgementUserDetailsService;
+import ca.mikegabelmann.judgement.security.jwt.JwtAuthenticationEntryPoint;
+import ca.mikegabelmann.judgement.security.jwt.JwtRequestFilter;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.RequestCacheConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
-import org.springframework.security.crypto.password.LdapShaPasswordEncoder;
-import org.springframework.security.crypto.password.Md4PasswordEncoder;
-import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
-import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
@@ -57,26 +48,21 @@ public class WebSecurityConfiguration {
 
     public static final int DEFAULT_PASSWORD_PREFIX_LENGTH = 8;
 
+    @Value("${judgement.security.pepper}")
+    private String pepper;
+
+    @Value("${judgement.security.web.debug:false}")
+    private boolean securityDebug;
+
     private final JudgementConfiguration judgementConfiguration;
-    //private final JudgementUserDetailsService judgementUserDetailsService;
-    //private final JudgementAuthenticationProvider judgementAuthenticationProvider;
-
-
-//    @Autowired
-//    public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration, JudgementAuthenticationProvider judgementAuthenticationProvider) {
-//        this.judgementConfiguration = judgementConfiguration;
-//        this.judgementAuthenticationProvider = judgementAuthenticationProvider;
-//    }
-
-//    @Autowired
-//    public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration, JudgementUserDetailsService judgementUserDetailsService) {
-//        this.judgementConfiguration = judgementConfiguration;
-//        this.judgementUserDetailsService = judgementUserDetailsService;
-//    }
+    private final JwtRequestFilter jwtRequestFilter;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Autowired
-    public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration) {
+    public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration, JwtRequestFilter jwtRequestFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.judgementConfiguration = judgementConfiguration;
+        this.jwtRequestFilter = jwtRequestFilter;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
     @Bean
@@ -88,9 +74,12 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
                 .requestMatchers("/codes/**").permitAll()
                 .requestMatchers("/login").permitAll()
+                .requestMatchers("/jwtlogin").permitAll()
                 .requestMatchers("/loginsuccess").permitAll()
                 .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults())
+
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
 
             //used to store JSESSIONID
             .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository()))
@@ -98,10 +87,12 @@ public class WebSecurityConfiguration {
 
             //.formLogin(Customizer.withDefaults())
             .formLogin(AbstractHttpConfigurer::disable)
-            //.sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             .logout((logout) -> logout.clearAuthentication(true).invalidateHttpSession(true).logoutUrl("/logout").permitAll().deleteCookies("JSESSIONID").logoutSuccessHandler(logoutSuccessHandler()))
         ;
+
+        http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -139,7 +130,7 @@ public class WebSecurityConfiguration {
     public static final String DEFAULT_ENCODING_ID = "argon2@SpringSecurity_v5_8";
 
     public PasswordEncoder createDelegatingPasswordEncoder() {
-        String secret = judgementConfiguration.getPepper();
+        String secret = this.pepper;
         String encodingId = DEFAULT_ENCODING_ID;
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
@@ -165,14 +156,57 @@ public class WebSecurityConfiguration {
           return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 
+    @PostConstruct
+    public void postConstruct() {
+        if (pepper == null || pepper.isEmpty()) {
+            /* if pepper is null or empty then securing passwords hashes in the database will be compromised. It should
+             * not be set as a spring property. It should be securely stored and set as an environment variable, system
+             * property, external config file not stored in repository with limited access, etc.
+             */
+            throw new NullPointerException("Pepper can not be null or empty. You MUST set this value, preferably as an environment variable.");
+
+        } else if (judgementConfiguration.isProfileActive("local")) {
+            LOGGER.warn("security pepper={}. NOTE: only displayed when using 'local' profile", pepper);
+
+        } else {
+            LOGGER.info("security pepper has been successfully set");
+        }
+    }
+
+    public String getPepper() {
+        return pepper;
+    }
+
+    public boolean isSecurityDebug() {
+        return securityDebug;
+    }
+
     /**
      * Get a random 'salt' for encryption purposes.
      * @return
      */
-    public static String getRandomSalt(int saltLength) {
+    public static byte[] getRandomSalt(final int saltLength) {
         byte[] salt = new byte[saltLength];
         new SecureRandom().nextBytes(salt);
-        return Base64.getEncoder().encodeToString(salt);
+        return salt;
+    }
+
+    /**
+     *
+     * @param bytes
+     * @return
+     */
+    public static String base64Encode(final byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /**
+     *
+     * @param s
+     * @return
+     */
+    public static String base64Encode(final String s) {
+        return Base64.getEncoder().encodeToString(s.getBytes());
     }
 
     /**
@@ -180,7 +214,7 @@ public class WebSecurityConfiguration {
      * @param value
      * @return
      */
-    public static String urlEncode(String value) {
+    public static String urlEncode(final String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
     }
 

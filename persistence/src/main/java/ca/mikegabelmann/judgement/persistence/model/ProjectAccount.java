@@ -40,6 +40,7 @@ public class ProjectAccount implements Serializable {
     @JoinColumn(name = "PROJECT_ROLE_CODE", nullable = false)
     private ProjectRoleCode projectRole;
 
+
     protected ProjectAccount() {}
 
     public ProjectAccount(ProjectAccountId id, Boolean active, ProjectRoleCode projectRole) {

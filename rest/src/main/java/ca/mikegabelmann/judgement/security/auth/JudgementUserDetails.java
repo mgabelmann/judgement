@@ -1,4 +1,4 @@
-package ca.mikegabelmann.judgement.security;
+package ca.mikegabelmann.judgement.security.auth;
 
 import ca.mikegabelmann.judgement.codes.AccountStatus;
 import org.springframework.security.core.GrantedAuthority;
@@ -30,7 +30,7 @@ public class JudgementUserDetails implements UserDetails, Serializable {
      * @param accountStatus
      * @param authorities
      */
-    public JudgementUserDetails(String username, String password, String salt, AccountStatus accountStatus, List<JudgementGrantedAuthority> authorities) {
+    public JudgementUserDetails(final String username, final String password, final String salt, final AccountStatus accountStatus, final Set<JudgementGrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
         this.salt = salt;
