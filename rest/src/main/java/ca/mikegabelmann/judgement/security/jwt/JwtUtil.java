@@ -42,11 +42,10 @@ public class JwtUtil {
     /** secret key used for encrypting JWT token. */
     private SecretKey secretKey;
 
+    private final MacAlgorithm ALGORITHM = Jwts.SIG.HS256;
 
 
     public JwtUtil() {}
-
-
 
     @PostConstruct
     public void init() {
@@ -55,14 +54,14 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(final String username) {
-        return JwtUtil.generateToken(username, jwtAccessExpiration, secretKey, Jwts.SIG.HS256);
+        return this.generateToken(username, jwtAccessExpiration, secretKey, ALGORITHM);
     }
 
     public String generateRefreshToken(final String username) {
-        return JwtUtil.generateToken(username, jwtRefreshExpiration, secretKey, Jwts.SIG.HS256);
+        return this.generateToken(username, jwtRefreshExpiration, secretKey, ALGORITHM);
     }
 
-    public static String generateToken(final String username, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
+    public String generateToken(final String username, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
         LOGGER.debug("generate JWT token for username {}", username);
         return Jwts.builder()
                 .subject(username)
@@ -72,7 +71,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public static String generateToken(final String username, Collection<? extends GrantedAuthority> authorities, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
+    public String generateAccessToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
+        return this.generateToken(username, authorities, jwtAccessExpiration, secretKey, ALGORITHM);
+    }
+
+    public String generateRefreshToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
+        return this.generateToken(username, authorities, jwtRefreshExpiration, secretKey, ALGORITHM);
+    }
+
+    public String generateToken(final String username, Collection<? extends GrantedAuthority> authorities, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
         LOGGER.debug("generate JWT token for username {}", username);
 
         String roles = authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining(","));
@@ -105,19 +112,19 @@ public class JwtUtil {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
             return true;
 
-        } catch (SecurityException e) {
+        } catch (final io.jsonwebtoken.security.SecurityException e) {
             LOGGER.debug("invalid JWT signature : {}", e.getMessage());
 
-        } catch (MalformedJwtException e) {
+        } catch (final MalformedJwtException e) {
             LOGGER.debug("invalid JWT token : {}", e.getMessage());
 
-        } catch (ExpiredJwtException e) {
+        } catch (final ExpiredJwtException e) {
             LOGGER.debug("expired JWT token : {}", e.getMessage());
 
-        } catch (UnsupportedJwtException e) {
+        } catch (final UnsupportedJwtException e) {
             LOGGER.debug("unsupported JWT token : {}", e.getMessage());
 
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             LOGGER.debug("invalid JWT claims : {}", e.getMessage());
         }
 
