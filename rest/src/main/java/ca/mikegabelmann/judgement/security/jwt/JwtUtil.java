@@ -1,5 +1,6 @@
 package ca.mikegabelmann.judgement.security.jwt;
 
+import ca.mikegabelmann.judgement.config.WebSecurityConfiguration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -18,18 +19,26 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtUtil.class);
 
+    private static final MacAlgorithm ALGORITHM = Jwts.SIG.HS256;
+
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    @Value("${judgement.security.pepper}")
+    private String refreshTokenSalt;
 
     /** expiration of access token - default 1 hour. */
     @Value("${jwt.access.expiration:3600000}")
@@ -40,9 +49,7 @@ public class JwtUtil {
     private int jwtRefreshExpiration;
 
     /** secret key used for encrypting JWT token. */
-    private SecretKey secretKey;
-
-    private final MacAlgorithm ALGORITHM = Jwts.SIG.HS256;
+    private volatile SecretKey secretKey;
 
 
     public JwtUtil() {}
@@ -53,13 +60,21 @@ public class JwtUtil {
         LOGGER.debug("JWT secret key is set");
     }
 
+    @Deprecated
     public String generateAccessToken(final String username) {
         return this.generateToken(username, jwtAccessExpiration, secretKey, ALGORITHM);
     }
 
+    public String generateAccessToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
+        return this.generateToken(username, authorities, jwtAccessExpiration, secretKey, ALGORITHM);
+    }
+
+    @Deprecated
     public String generateRefreshToken(final String username) {
         return this.generateToken(username, jwtRefreshExpiration, secretKey, ALGORITHM);
     }
+
+
 
     public String generateToken(final String username, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
         LOGGER.debug("generate JWT token for username {}", username);
@@ -71,12 +86,22 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateAccessToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
-        return this.generateToken(username, authorities, jwtAccessExpiration, secretKey, ALGORITHM);
+    public UUID generateRefreshToken() {
+        return UUID.randomUUID();
     }
 
-    public String generateRefreshToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
-        return this.generateToken(username, authorities, jwtRefreshExpiration, secretKey, ALGORITHM);
+    public Instant getRefreshTokenExpiration() {
+        return Instant.now().plusMillis(jwtRefreshExpiration);
+    }
+
+    public String hashRefreshToken(final String token) throws NoSuchAlgorithmException {
+        String salt = this.refreshTokenSalt;
+        byte[] tokenToHash = (salt + token).getBytes(StandardCharsets.UTF_8);
+
+        final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
+        final byte[] hash = digest.digest(tokenToHash);
+
+        return WebSecurityConfiguration.bytesToHex(hash);
     }
 
     public String generateToken(final String username, Collection<? extends GrantedAuthority> authorities, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {

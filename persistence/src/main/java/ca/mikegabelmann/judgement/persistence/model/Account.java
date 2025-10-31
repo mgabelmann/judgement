@@ -1,11 +1,13 @@
 package ca.mikegabelmann.judgement.persistence.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -54,6 +56,10 @@ public class Account extends AbstractAuditable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ACCOUNT_ROLE", nullable = false)
     private RoleCode accountRole;
+
+//    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JoinColumn(name = "token_id", referencedColumnName = "username", nullable = true)
+//    private RefreshToken refreshToken;
 
 
     /** No arg constructor for use by JPA. */

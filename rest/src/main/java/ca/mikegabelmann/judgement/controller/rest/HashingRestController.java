@@ -1,9 +1,10 @@
 package ca.mikegabelmann.judgement.controller.rest;
 
-import ca.mikegabelmann.judgement.security.config.WebSecurityConfiguration;
+import ca.mikegabelmann.judgement.config.WebSecurityConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,12 +23,14 @@ public class HashingRestController {
     @Autowired
     private WebSecurityConfiguration webSecurityConfiguration;
 
+    @Value("${judgement.security.pepper}")
+    private String pepper;
 
     //http://localhost:8080/codes/hashpassword?password=123456
     @GetMapping(path = "/codes/hashpassword")
     public ResponseEntity<HashResponse> hashPassword(@RequestParam(name = "password") String password) {
-        String secret = webSecurityConfiguration.getPepper();
-        int saltLength = 16;
+        String secret = pepper;
+        int saltLength = 32;
         int iterations = 2;
         String algorithmName = WebSecurityConfiguration.DEFAULT_ENCODING_ID;
 

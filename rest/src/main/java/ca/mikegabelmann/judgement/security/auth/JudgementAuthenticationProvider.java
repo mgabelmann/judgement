@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class JudgementAuthenticationProvider implements AuthenticationProvider {
-//public class JudgementAuthenticationProvider {
+//public class JudgementAuthenticationProvider implements AuthenticationProvider {
+public class JudgementAuthenticationProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JudgementAuthenticationProvider.class);
 

@@ -1,6 +1,5 @@
-package ca.mikegabelmann.judgement.security.config;
+package ca.mikegabelmann.judgement.config;
 
-import ca.mikegabelmann.judgement.controller.config.JudgementConfiguration;
 import ca.mikegabelmann.judgement.security.jwt.JwtAuthenticationEntryPoint;
 import ca.mikegabelmann.judgement.security.jwt.JwtRequestFilter;
 import jakarta.annotation.PostConstruct;
@@ -20,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
+import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
@@ -46,11 +46,13 @@ import java.util.Map;
 public class WebSecurityConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebSecurityConfiguration.class);
 
-    public static final int DEFAULT_PASSWORD_PREFIX_LENGTH = 8;
+    public static final String DEFAULT_ENCODING_ID = "argon2@SpringSecurity_v5_8";
 
+    /**  */
     @Value("${judgement.security.pepper}")
     private String pepper;
 
+    /**  */
     @Value("${judgement.security.web.debug:false}")
     private boolean securityDebug;
 
@@ -58,11 +60,26 @@ public class WebSecurityConfiguration {
     private final JwtRequestFilter jwtRequestFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+
     @Autowired
     public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration, JwtRequestFilter jwtRequestFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.judgementConfiguration = judgementConfiguration;
         this.jwtRequestFilter = jwtRequestFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        if (pepper == null || pepper.isEmpty()) {
+            //pepper is required for using the application
+            throw new NullPointerException("Pepper can not be null or empty. You MUST set this value, preferably as an environment variable.");
+
+        } else if (judgementConfiguration.isProfileActive("local")) {
+            LOGGER.warn("security pepper={}. NOTE: only displayed when using 'local' profile", pepper);
+
+        } else {
+            LOGGER.info("security pepper has been successfully set");
+        }
     }
 
     @Bean
@@ -73,8 +90,9 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/api/actuator/**").hasRole("ADMINISTRATOR")
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
                 .requestMatchers("/codes/**").permitAll()
-                .requestMatchers("/login").permitAll()
+                //.requestMatchers("/login").permitAll()
                 .requestMatchers("/jwtlogin").permitAll()
+                .requestMatchers("/jwtrefresh").permitAll()
                 .requestMatchers("/loginsuccess").permitAll()
                 .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults())
@@ -123,13 +141,6 @@ public class WebSecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        //return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        return this.createDelegatingPasswordEncoder();
-    }
-
-    public static final String DEFAULT_ENCODING_ID = "argon2@SpringSecurity_v5_8";
-
-    public PasswordEncoder createDelegatingPasswordEncoder() {
         String secret = this.pepper;
         String encodingId = DEFAULT_ENCODING_ID;
 
@@ -144,7 +155,7 @@ public class WebSecurityConfiguration {
 //        encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v4_1());
         encoders.put("scrypt@SpringSecurity_v5_8", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
 //        encoders.put("SHA-1", new MessageDigestPasswordEncoder("SHA-1"));
-//        encoders.put("SHA-256", new MessageDigestPasswordEncoder("SHA-256"));
+        encoders.put("SHA-256", new MessageDigestPasswordEncoder("SHA-256"));
 //        encoders.put("sha256", new StandardPasswordEncoder());
 //        encoders.put("argon2", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_2());
         encoders.put("argon2@SpringSecurity_v5_8", Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8());
@@ -153,28 +164,7 @@ public class WebSecurityConfiguration {
         encoders.put("judgeargon2", new Argon2PasswordEncoder(16, 32, 1, 24576, 2));
         encoders.put("judgepbkdf2", new Pbkdf2PasswordEncoder(secret, 16, 310000, Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256));
 
-          return new DelegatingPasswordEncoder(encodingId, encoders);
-    }
-
-    @PostConstruct
-    public void postConstruct() {
-        if (pepper == null || pepper.isEmpty()) {
-            /* if pepper is null or empty then securing passwords hashes in the database will be compromised. It should
-             * not be set as a spring property. It should be securely stored and set as an environment variable, system
-             * property, external config file not stored in repository with limited access, etc.
-             */
-            throw new NullPointerException("Pepper can not be null or empty. You MUST set this value, preferably as an environment variable.");
-
-        } else if (judgementConfiguration.isProfileActive("local")) {
-            LOGGER.warn("security pepper={}. NOTE: only displayed when using 'local' profile", pepper);
-
-        } else {
-            LOGGER.info("security pepper has been successfully set");
-        }
-    }
-
-    public String getPepper() {
-        return pepper;
+        return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 
     public boolean isSecurityDebug() {
@@ -216,6 +206,21 @@ public class WebSecurityConfiguration {
      */
     public static String urlEncode(final String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
+    }
+
+    public static String bytesToHex(final byte[] hash) {
+        StringBuilder hexString = new StringBuilder(2 * hash.length);
+        for (byte b : hash) {
+            String hex = Integer.toHexString(0xff & b);
+
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+
+            hexString.append(hex);
+        }
+
+        return hexString.toString();
     }
 
 }
