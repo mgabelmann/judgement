@@ -1,5 +1,6 @@
 package ca.mikegabelmann.judgement.persistence.service;
 
+import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.AccountActivityLog;
 import ca.mikegabelmann.judgement.persistence.repository.AccountActivityLogRepository;
 import org.slf4j.Logger;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +29,12 @@ public class AccountActivityLogServiceImpl implements AccountActivityLogService 
     @Override
     public List<AccountActivityLog> getLogsByAccountId(final UUID accountId, Pageable pageable) {
         return accountActivityLogRepository.findByAccountIdOrderByActivityOnDesc(accountId, pageable);
+    }
+
+    @Override
+    public void saveLog(final Account account, final String message) {
+        AccountActivityLog log = new AccountActivityLog(null, Instant.now(), message, account);
+        accountActivityLogRepository.save(log);
     }
 
 }

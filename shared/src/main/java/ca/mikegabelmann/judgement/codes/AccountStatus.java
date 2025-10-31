@@ -7,6 +7,9 @@ public enum AccountStatus {
     /** New account, email sent, but no response yet. */
     PENDING("Pending"),
 
+    /** Account requires a new password. Similar to 'NEW'. */
+    PASSWORD_RESET("Password Reset"),
+
     /** New account, email response received. */
     ACTIVE("Active"),
 
@@ -18,9 +21,6 @@ public enum AccountStatus {
 
     /** Account disabled. This is a permanent closure until admin determines otherwise. */
     BLOCKED("Blocked"),
-
-    /** Account requires a new password. Similar to 'NEW'. */
-    PASSWORD_RESET("Password Reset"),
     ;
 
     private final String label;

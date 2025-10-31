@@ -3,6 +3,7 @@ package ca.mikegabelmann.judgement.controller.rest;
 import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.RefreshToken;
 import ca.mikegabelmann.judgement.persistence.repository.RefreshTokenRepository;
+import ca.mikegabelmann.judgement.persistence.service.AccountActivityLogService;
 import ca.mikegabelmann.judgement.security.auth.JudgementAuthenticationProvider;
 import ca.mikegabelmann.judgement.security.auth.JudgementUserDetailsService;
 import ca.mikegabelmann.judgement.security.jwt.JwtUtil;
@@ -23,10 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.NoSuchAlgorithmException;
-import java.sql.Ref;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.UUID;
 
 
 @RestController
@@ -40,6 +39,7 @@ public class AuthRestController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
     private final JudgementUserDetailsService judgementUserDetailsService;
+    private final AccountActivityLogService accountActivityLogService;
 
     @Autowired
     public AuthRestController(
@@ -47,16 +47,16 @@ public class AuthRestController {
             final JudgementAuthenticationProvider authenticationProvider,
             final SecurityContextRepository securityContextRepository,
             final RefreshTokenRepository refreshTokenRepository,
-            final JwtUtil jwtUtil, JudgementUserDetailsService judgementUserDetailsService) {
+            final JwtUtil jwtUtil, JudgementUserDetailsService judgementUserDetailsService, AccountActivityLogService accountActivityLogService) {
 
         this.securityContextRepository = securityContextRepository;
         this.authenticationProvider = authenticationProvider;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
         this.judgementUserDetailsService = judgementUserDetailsService;
+        this.accountActivityLogService = accountActivityLogService;
     }
 
-    //curl -v http://localhost:8080/login -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"username\":\"ADMIN\",\"password\":\"123456\"}"
 /*
     @PostMapping(path = "/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
@@ -78,6 +78,7 @@ public class AuthRestController {
     }
 */
 
+    //curl -v http://localhost:8080/login -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"username\":\"ADMIN\",\"password\":\"123456\"}"
     @PostMapping(path = "/jwtlogin")
     public ResponseEntity<?> jwtLogin(@RequestBody LoginRequest loginRequest) throws NoSuchAlgorithmException {
         String username = loginRequest.getUsername();
@@ -104,9 +105,8 @@ public class AuthRestController {
         }
 
         String accessToken = jwtUtil.generateAccessToken(username, authResponse.getAuthorities());
-        String refreshToken = jwtUtil.generateRefreshToken().toString();
 
-        //hash the token for the DB for extra protection
+        String refreshToken = jwtUtil.generateRefreshToken().toString();
         String hashedToken = jwtUtil.hashRefreshToken(refreshToken);
 
         Instant refreshExpiry = jwtUtil.getRefreshTokenExpiration();
@@ -114,6 +114,9 @@ public class AuthRestController {
 
         RefreshToken refreshTokenEntity = new RefreshToken(null, username, refreshExpiry, hashedToken, username, now, username, now, 0L);
         refreshTokenRepository.save(refreshTokenEntity);
+
+        //save request for refresh token
+        //accountActivityLogService.saveLog(account, "refresh token request - granted");
 
         return ResponseEntity.ok(new JwtTokenResponse(accessToken, refreshToken));
     }
@@ -125,6 +128,7 @@ public class AuthRestController {
 
         if (oldToken.isPresent()) {
             RefreshToken currentToken = oldToken.get();
+            String username = currentToken.getUsername();
 
             if (currentToken.getExpiry().isBefore(Instant.now())) {
                 //expired, can't refresh
@@ -135,19 +139,23 @@ public class AuthRestController {
 
             } else {
                 //active, so refresh (happy path)
+                Account account = judgementUserDetailsService.loadAccountByUsername(username);
+                UserDetails userDetails = judgementUserDetailsService.getUserDetails(account);
+                String accessToken = jwtUtil.generateAccessToken(username, userDetails.getAuthorities());
+
                 String newToken = jwtUtil.generateRefreshToken().toString();
                 String newHashedToken = jwtUtil.hashRefreshToken(newToken);
 
                 Instant refreshExpiry = jwtUtil.getRefreshTokenExpiration();
-                Instant now = Instant.now();
 
                 currentToken.setToken(newHashedToken);
-                currentToken.setModifiedOn(now);
+                currentToken.setModifiedBy(username);
+                currentToken.setModifiedOn(Instant.now());
                 currentToken.setExpiry(refreshExpiry);
                 refreshTokenRepository.save(currentToken);
 
-                UserDetails userDetails = judgementUserDetailsService.loadUserByUsername(currentToken.getUsername());
-                String accessToken = jwtUtil.generateAccessToken(currentToken.getUsername(), userDetails.getAuthorities());
+                //save request for refresh token
+                accountActivityLogService.saveLog(account, "refresh token request - granted");
 
                 LOGGER.debug("refresh - issuing new access/refresh token");
 
@@ -159,6 +167,7 @@ public class AuthRestController {
         }
     }
 
+    //curl -v http://localhost:8080/testsecured -H "cache-control: no-cache" -H "content-type: application/json" -H "Authorization: Bearer <accesstoken>"
     @GetMapping("/testsecured")
     public ResponseEntity<String> testSecured() {
         return new ResponseEntity<>("<h1 style=\"color=#F00\">Secure end point</h1>", HttpStatus.OK);
@@ -177,7 +186,7 @@ public class AuthRestController {
     /**
      * Returned for login or refresh requests.
      */
-    public class JwtTokenResponse {
+    public static class JwtTokenResponse {
         public final String access;
         public final String refresh;
 
@@ -195,6 +204,9 @@ public class AuthRestController {
         }
     }
 
+    /**
+     * Required for refresh requests.
+     */
     public static class JwtRefreshRequest {
         public String refresh;
 

@@ -34,13 +34,13 @@ public class AccountActivityLog implements Serializable {
     private String message;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ACCOUNT_ID", nullable = true)
+    @JoinColumn(name = "ACCOUNT_ID", nullable = false)
     private Account account;
 
 
     protected AccountActivityLog() {}
 
-    public AccountActivityLog(UUID id, Instant activityOn, String message, Account account) {
+    public AccountActivityLog(final UUID id, final Instant activityOn, final String message, final Account account) {
         this.id = id;
         this.activityOn = activityOn;
         this.message = message;
