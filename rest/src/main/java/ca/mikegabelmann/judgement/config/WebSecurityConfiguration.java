@@ -49,10 +49,6 @@ public class WebSecurityConfiguration {
     public static final String DEFAULT_ENCODING_ID = "argon2@SpringSecurity_v5_8";
 
     /**  */
-    @Value("${judgement.security.pepper}")
-    private String pepper;
-
-    /**  */
     @Value("${judgement.security.web.debug:false}")
     private boolean securityDebug;
 
@@ -68,20 +64,6 @@ public class WebSecurityConfiguration {
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
-    @PostConstruct
-    public void postConstruct() {
-        if (pepper == null || pepper.isEmpty()) {
-            //pepper is required for using the application
-            throw new NullPointerException("Pepper can not be null or empty. You MUST set this value, preferably as an environment variable.");
-
-        } else if (judgementConfiguration.isProfileActive("local")) {
-            LOGGER.warn("security pepper={}. NOTE: only displayed when using 'local' profile", pepper);
-
-        } else {
-            LOGGER.info("security pepper has been successfully set");
-        }
-    }
-
     @Bean
     public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
         http
@@ -90,9 +72,9 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/api/actuator/**").hasRole("ADMINISTRATOR")
                 .requestMatchers("/css/**", "/js/**", "/img/**", "/lib/**", "/favicon.ico").permitAll()
                 .requestMatchers("/codes/**").permitAll()
-                //.requestMatchers("/login").permitAll()
                 .requestMatchers("/jwtlogin").permitAll()
                 .requestMatchers("/jwtrefresh").permitAll()
+                //.requestMatchers("/jwtlogout").permitAll()
                 .requestMatchers("/loginsuccess").permitAll()
                 .anyRequest().authenticated())
             .httpBasic(Customizer.withDefaults())
@@ -107,7 +89,7 @@ public class WebSecurityConfiguration {
             .formLogin(AbstractHttpConfigurer::disable)
             .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .logout((logout) -> logout.clearAuthentication(true).invalidateHttpSession(true).logoutUrl("/logout").permitAll().deleteCookies("JSESSIONID").logoutSuccessHandler(logoutSuccessHandler()))
+            //.logout((logout) -> logout.clearAuthentication(true).invalidateHttpSession(true).logoutUrl("/jwtlogout").permitAll().deleteCookies("JSESSIONID").logoutSuccessHandler(logoutSuccessHandler()))
         ;
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -141,7 +123,7 @@ public class WebSecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        String secret = this.pepper;
+        //String secret = this.pepper;
         String encodingId = DEFAULT_ENCODING_ID;
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
@@ -162,65 +144,13 @@ public class WebSecurityConfiguration {
 
         //custom encoders
         encoders.put("judgeargon2", new Argon2PasswordEncoder(16, 32, 1, 24576, 2));
-        encoders.put("judgepbkdf2", new Pbkdf2PasswordEncoder(secret, 16, 310000, Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256));
+        //encoders.put("judgepbkdf2", new Pbkdf2PasswordEncoder(secret, 16, 310000, Pbkdf2PasswordEncoder.SecretKeyFactoryAlgorithm.PBKDF2WithHmacSHA256));
 
         return new DelegatingPasswordEncoder(encodingId, encoders);
     }
 
     public boolean isSecurityDebug() {
         return securityDebug;
-    }
-
-    /**
-     * Get a random 'salt' for encryption purposes.
-     * @return
-     */
-    public static byte[] getRandomSalt(final int saltLength) {
-        byte[] salt = new byte[saltLength];
-        new SecureRandom().nextBytes(salt);
-        return salt;
-    }
-
-    /**
-     *
-     * @param bytes
-     * @return
-     */
-    public static String base64Encode(final byte[] bytes) {
-        return Base64.getEncoder().encodeToString(bytes);
-    }
-
-    /**
-     *
-     * @param s
-     * @return
-     */
-    public static String base64Encode(final String s) {
-        return Base64.getEncoder().encodeToString(s.getBytes());
-    }
-
-    /**
-     * URL encode a string.
-     * @param value
-     * @return
-     */
-    public static String urlEncode(final String value) {
-        return URLEncoder.encode(value, StandardCharsets.UTF_8);
-    }
-
-    public static String bytesToHex(final byte[] hash) {
-        StringBuilder hexString = new StringBuilder(2 * hash.length);
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-
-            hexString.append(hex);
-        }
-
-        return hexString.toString();
     }
 
 }

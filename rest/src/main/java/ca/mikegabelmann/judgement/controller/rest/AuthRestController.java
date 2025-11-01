@@ -1,6 +1,5 @@
 package ca.mikegabelmann.judgement.controller.rest;
 
-import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.RefreshToken;
 import ca.mikegabelmann.judgement.persistence.repository.RefreshTokenRepository;
 import ca.mikegabelmann.judgement.persistence.service.AccountActivityLogService;
@@ -80,10 +79,10 @@ public class AuthRestController {
 
     //curl -v http://localhost:8080/login -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"username\":\"ADMIN\",\"password\":\"123456\"}"
     @PostMapping(path = "/jwtlogin")
-    public ResponseEntity<?> jwtLogin(@RequestBody LoginRequest loginRequest) throws NoSuchAlgorithmException {
+    public ResponseEntity<?> jwtLogin(@RequestBody JwtLoginRequest loginRequest) throws NoSuchAlgorithmException {
         String username = loginRequest.getUsername();
-        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, loginRequest.getPassword());
 
+        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(username, loginRequest.getPassword());
         Authentication authResponse = authenticationProvider.authenticate(authRequest);
 
         //TODO: move this to a token service or refresh token service class?!?
@@ -94,8 +93,10 @@ public class AuthRestController {
 
             if (token.getExpiry().isBefore(Instant.now())) {
                 //expired refresh token, delete refresh token and proceed
-                LOGGER.debug("user={}: deleting expired refresh token",  username);
                 refreshTokenRepository.delete(token);
+
+                LOGGER.debug("user={}: deleting expired refresh token",  username);
+                accountActivityLogService.save(username, "login token request - expired, deleting refresh token");
 
             } else {
                 //active, user already has a session, refuse
@@ -106,7 +107,7 @@ public class AuthRestController {
 
         String accessToken = jwtUtil.generateAccessToken(username, authResponse.getAuthorities());
 
-        String refreshToken = jwtUtil.generateRefreshToken().toString();
+        String refreshToken = jwtUtil.generateRefreshToken();
         String hashedToken = jwtUtil.hashRefreshToken(refreshToken);
 
         Instant refreshExpiry = jwtUtil.getRefreshTokenExpiration();
@@ -116,13 +117,14 @@ public class AuthRestController {
         refreshTokenRepository.save(refreshTokenEntity);
 
         //save request for refresh token
-        //accountActivityLogService.saveLog(account, "refresh token request - granted");
+        accountActivityLogService.save(username, "login token request - granted");
 
         return ResponseEntity.ok(new JwtTokenResponse(accessToken, refreshToken));
     }
 
+    //curl -v http://localhost:8080/jwtrefresh -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
     @PostMapping(path = "/jwtrefresh")
-    public ResponseEntity<?> jwtRefresh(@RequestBody JwtRefreshRequest token) throws NoSuchAlgorithmException {
+    public ResponseEntity<?> jwtRefresh(@RequestBody JwtRefreshTokenRequest token) throws NoSuchAlgorithmException {
         String oldHashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
         Optional<RefreshToken> oldToken = refreshTokenRepository.findByToken(oldHashedToken);
 
@@ -132,20 +134,21 @@ public class AuthRestController {
 
             if (currentToken.getExpiry().isBefore(Instant.now())) {
                 //expired, can't refresh
-                LOGGER.debug("refresh requested, but token has expired. deleting refresh token");
                 refreshTokenRepository.delete(currentToken);
+
+                //save deletion of old refresh token
+                LOGGER.debug("user={}: deleting expired refresh token",  username);
+                accountActivityLogService.save(username, "refresh token request - expired, deleting refresh token");
 
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
             } else {
                 //active, so refresh (happy path)
-                Account account = judgementUserDetailsService.loadAccountByUsername(username);
-                UserDetails userDetails = judgementUserDetailsService.getUserDetails(account);
+                UserDetails userDetails = judgementUserDetailsService.loadUserByUsername(username);
+
                 String accessToken = jwtUtil.generateAccessToken(username, userDetails.getAuthorities());
-
-                String newToken = jwtUtil.generateRefreshToken().toString();
+                String newToken = jwtUtil.generateRefreshToken();
                 String newHashedToken = jwtUtil.hashRefreshToken(newToken);
-
                 Instant refreshExpiry = jwtUtil.getRefreshTokenExpiration();
 
                 currentToken.setToken(newHashedToken);
@@ -155,16 +158,35 @@ public class AuthRestController {
                 refreshTokenRepository.save(currentToken);
 
                 //save request for refresh token
-                accountActivityLogService.saveLog(account, "refresh token request - granted");
-
-                LOGGER.debug("refresh - issuing new access/refresh token");
+                LOGGER.debug("user={}: issuing new tokens", username);
+                accountActivityLogService.save(username, "refresh token request - granted");
 
                 return ResponseEntity.ok(new JwtTokenResponse(accessToken, newToken));
             }
-
-        } else {
-            return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
         }
+
+        return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
+    }
+
+    @PostMapping("/jwtlogout")
+    public ResponseEntity<?> jwtLogout(@RequestBody JwtRefreshTokenRequest token) throws NoSuchAlgorithmException {
+        String oldHashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
+        Optional<RefreshToken> oldToken = refreshTokenRepository.findByToken(oldHashedToken);
+
+        if (oldToken.isPresent()) {
+            String username = jwtUtil.getUsernameFromToken(token.getRefresh());
+
+            refreshTokenRepository.delete(oldToken.get());
+            SecurityContextHolder.clearContext();
+
+            //save logout
+            LOGGER.debug("user={}: logout", username);
+            accountActivityLogService.save(username, "logout");
+
+            return ResponseEntity.ok().body("User " + username + " has been logged out");
+        }
+
+        return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
     }
 
     //curl -v http://localhost:8080/testsecured -H "cache-control: no-cache" -H "content-type: application/json" -H "Authorization: Bearer <accesstoken>"
@@ -207,12 +229,12 @@ public class AuthRestController {
     /**
      * Required for refresh requests.
      */
-    public static class JwtRefreshRequest {
+    public static class JwtRefreshTokenRequest {
         public String refresh;
 
-        protected JwtRefreshRequest() {}
+        protected JwtRefreshTokenRequest() {}
 
-        public JwtRefreshRequest(String refresh) {
+        public JwtRefreshTokenRequest(String refresh) {
             this.refresh = refresh;
         }
 
@@ -228,13 +250,13 @@ public class AuthRestController {
     /**
      * Required for login requests.
      */
-    public static class LoginRequest {
+    public static class JwtLoginRequest {
         private String username;
         private String password;
 
-        protected LoginRequest() {}
+        protected JwtLoginRequest() {}
 
-        public LoginRequest(final String username, final String password) {
+        public JwtLoginRequest(final String username, final String password) {
             this.username = username;
             this.password = password;
         }

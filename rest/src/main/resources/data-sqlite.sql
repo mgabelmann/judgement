@@ -29,7 +29,7 @@ INSERT INTO PROJECT_ROLE_CODE(code, label, active) VALUES ('PROJECT_VIEWER', 'Pr
 --ACCOUNT
 INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('40b04e44-fd4d-4b5a-86af-c8e5bbd9d348', 'test@test.com', 'SYSTEM', '{noop}password', '', 'ACTIVE', 'SYSTEM','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
 
-INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('41858569-dca9-43a2-8227-d3dbdefc7398', 'admin@test.com', 'ADMIN', '{judgepbkdf2}39f1a6ba68e96620ee34473dd124dc20eedeeaadb80426bbea7f6e9932abf7abbf6c68d69a05723c111d83ec26151044', 'QkhT97vlBUo=', 'ACTIVE', 'ADMINISTRATOR','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
+INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('41858569-dca9-43a2-8227-d3dbdefc7398', 'admin@test.com', 'ADMIN', '{argon2@SpringSecurity_v5_8}$argon2id$v=19$m=16384,t=2,p=1$uYlDg042kQrev2kLcENV0w$+42gve/41uPFTCfBJ9PcyvM1SC0ud9ER6uyO8RjqrsQ', '', 'ACTIVE', 'ADMINISTRATOR','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
 
 INSERT INTO ACCOUNT(account_id, email, username, password, salt, account_status, account_role, createdby, modifiedby, createdon_dtm, modifiedon_dtm, version) VALUES ('c25d0b83-ae0a-479e-a2d0-a442335bd88f', 'pm@test.com', 'PM', '{argon2@SpringSecurity_v5_8}$argon2id$v=19$m=16384,t=2,p=1$uYlDg042kQrev2kLcENV0w$+42gve/41uPFTCfBJ9PcyvM1SC0ud9ER6uyO8RjqrsQ', '', 'ACTIVE', 'ADMINISTRATOR','SYSTEM', 'SYSTEM', datetime(), datetime(), 0);
 

@@ -27,6 +27,12 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     Optional<RefreshToken> findByUsername(String username);
 
     /**
+     *
+     * @param username
+     */
+    void deleteByUsername(String username);
+
+    /**
      * Find all expired tokens, used to periodically clean up expired tokens in the database.
      * @param expiry
      * @return all expired tokens

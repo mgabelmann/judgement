@@ -27,7 +27,7 @@ public class RefreshToken extends AbstractAuditable {
 //    @OneToOne(mappedBy = "token")
 //    private Account account;
 
-    @Column(name = "username", nullable = false, unique = true)
+    @Column(name = "username", nullable = false, unique = true, length = 16)
     private String username;
 
 

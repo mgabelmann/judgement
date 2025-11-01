@@ -1,5 +1,7 @@
 package ca.mikegabelmann.judgement.security.jwt;
 
+import ca.mikegabelmann.judgement.JudgementUtil;
+import ca.mikegabelmann.judgement.config.JudgementConfiguration;
 import ca.mikegabelmann.judgement.config.WebSecurityConfiguration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -12,6 +14,7 @@ import io.jsonwebtoken.security.MacAlgorithm;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -37,7 +40,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${judgement.security.pepper}")
+    @Value("${jwt.refreshtoken.salt}")
     private String refreshTokenSalt;
 
     /** expiration of access token - default 1 hour. */
@@ -51,43 +54,49 @@ public class JwtUtil {
     /** secret key used for encrypting JWT token. */
     private volatile SecretKey secretKey;
 
+    private final JudgementConfiguration judgementConfiguration;
 
-    public JwtUtil() {}
+
+    @Autowired
+    public JwtUtil(final JudgementConfiguration judgementConfiguration) {
+        this.judgementConfiguration = judgementConfiguration;
+    }
 
     @PostConstruct
-    public void init() {
+    public void postConstruct() {
+        this.ensureVariableSet("jwt.secret", jwtSecret, "local");
+        this.ensureVariableSet("jwt.refreshtoken.salt", refreshTokenSalt, "local");
+        //this.ensureVariableSet("jwt.secret", jwtSecret, "local");
+
+        //set secret key for JWT
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-        LOGGER.debug("JWT secret key is set");
     }
 
-    @Deprecated
-    public String generateAccessToken(final String username) {
-        return this.generateToken(username, jwtAccessExpiration, secretKey, ALGORITHM);
+    private void ensureVariableSet(final String propertyName, final String value, final String profile) {
+        if (value == null || value.isEmpty()) {
+            //variable must have a value
+            throw new NullPointerException(propertyName + " can not be null or empty. You MUST set this value, preferably as an environment variable.");
+
+        } else if (judgementConfiguration.isProfileActive(profile)) {
+            LOGGER.warn("{}={}. NOTE: only displayed when using '{}' profile", propertyName, value, profile);
+
+        } else {
+            LOGGER.info("{} has been successfully set", propertyName);
+        }
     }
 
+    /**
+     *
+     * @param username
+     * @param authorities
+     * @return
+     */
     public String generateAccessToken(final String username, final Collection<? extends GrantedAuthority> authorities) {
         return this.generateToken(username, authorities, jwtAccessExpiration, secretKey, ALGORITHM);
     }
 
-    @Deprecated
-    public String generateRefreshToken(final String username) {
-        return this.generateToken(username, jwtRefreshExpiration, secretKey, ALGORITHM);
-    }
-
-
-
-    public String generateToken(final String username, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
-        LOGGER.debug("generate JWT token for username {}", username);
-        return Jwts.builder()
-                .subject(username)
-                .issuedAt(new Date())
-                .expiration(Date.from(Instant.now().plusMillis(expiry)))
-                .signWith(secretKey, algorithm)
-                .compact();
-    }
-
-    public UUID generateRefreshToken() {
-        return UUID.randomUUID();
+    public String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
     public Instant getRefreshTokenExpiration() {
@@ -101,7 +110,7 @@ public class JwtUtil {
         final MessageDigest digest = MessageDigest.getInstance("SHA3-256");
         final byte[] hash = digest.digest(tokenToHash);
 
-        return WebSecurityConfiguration.bytesToHex(hash);
+        return JudgementUtil.bytesToHex(hash);
     }
 
     public String generateToken(final String username, Collection<? extends GrantedAuthority> authorities, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {

@@ -55,14 +55,14 @@ class AccountActivityLogRepositoryTest {
         Account account = ModelTestFactory.createAccount(true, "test@dot.com", "test", asc1, rc1);
         this.a1 = this.accountRepository.save(account);
 
-        AccountActivityLog accountActivityLog = ModelTestFactory.createAccountActivityLog("this is a test message 1", a1);
+        AccountActivityLog accountActivityLog = ModelTestFactory.createAccountActivityLog(a1.getUsername(), "this is a test message 1");
         this.aal1 = this.accountActivityLogRepository.save(accountActivityLog);
     }
 
     @Test
     @DisplayName("find by account id and ordered - single record")
     void test1_findByAccountIdOrderByActivityOnDesc() {
-        List<AccountActivityLog> records = accountActivityLogRepository.findByAccountIdOrderByActivityOnDesc(a1.getId(), Pageable.unpaged());
+        List<AccountActivityLog> records = accountActivityLogRepository.findByUsernameOrderByActivityOnDesc(a1.getUsername(), Pageable.unpaged());
         Assertions.assertFalse(records.isEmpty());
         Assertions.assertEquals(1, records.size());
     }
@@ -70,8 +70,8 @@ class AccountActivityLogRepositoryTest {
     @Test
     @DisplayName("find by account id and ordered - multiple records")
     void text2_findByAccountIdOrderByActivityOnDesc() {
-        AccountActivityLog aal2 = ModelTestFactory.createAccountActivityLog("this is a test message 2", a1);
-        AccountActivityLog aal3 = ModelTestFactory.createAccountActivityLog("this is a test message 3", a1);
+        AccountActivityLog aal2 = ModelTestFactory.createAccountActivityLog(a1.getUsername(), "this is a test message 2");
+        AccountActivityLog aal3 = ModelTestFactory.createAccountActivityLog(a1.getUsername(), "this is a test message 3");
 
         aal2.setActivityOn(Instant.now().plusSeconds(5));
         aal3.setActivityOn(Instant.now().plusSeconds(1));
@@ -79,7 +79,7 @@ class AccountActivityLogRepositoryTest {
         this.accountActivityLogRepository.save(aal2);
         this.accountActivityLogRepository.save(aal3);
 
-        List<AccountActivityLog> records = accountActivityLogRepository.findByAccountIdOrderByActivityOnDesc(a1.getId(), Pageable.unpaged());
+        List<AccountActivityLog> records = accountActivityLogRepository.findByUsernameOrderByActivityOnDesc(a1.getUsername(), Pageable.unpaged());
 
         Assertions.assertFalse(records.isEmpty());
         Assertions.assertEquals(3, records.size());

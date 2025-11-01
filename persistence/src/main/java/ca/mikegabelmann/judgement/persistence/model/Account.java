@@ -37,7 +37,7 @@ public class Account extends AbstractAuditable {
     private String username;
 
     /**
-     * This is a hashed password using a random 'salt' (1/account) and a 'pepper' (1/system).
+     * This MUST be a hashed value for security purposes.
      */
     @Column(name = "PASSWORD", nullable = false, length = 256)
     private String password;

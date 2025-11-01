@@ -1,5 +1,6 @@
 package ca.mikegabelmann.judgement.security.jwt;
 
+import ca.mikegabelmann.judgement.config.JudgementConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,12 +13,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = JwtUtil.class)
+@ContextConfiguration(classes = {JwtUtil.class, JudgementConfiguration.class})
 @TestPropertySource(properties = {
         "jwt.secret=a9c9cca61f97e3d9bf484cdbc870b7ca7e37d77bfe4dfd464bff5d505f2de3d7",
         "jwt.access.expiration=3600000",
@@ -35,7 +37,7 @@ class JwtUtilTest {
 
     @Test
     void generateAccessToken() {
-        String token = jwtUtil.generateAccessToken("username");
+        String token = jwtUtil.generateAccessToken("username", Collections.EMPTY_LIST);
         Assertions.assertNotNull(token);
     }
 
@@ -47,7 +49,7 @@ class JwtUtilTest {
 
     @Test
     void getUsernameFromToken() {
-        String token = jwtUtil.generateAccessToken("username");
+        String token = jwtUtil.generateAccessToken("username", Collections.EMPTY_LIST);
         String username = jwtUtil.getUsernameFromToken(token);
 
         Assertions.assertEquals("username", username);
@@ -55,13 +57,13 @@ class JwtUtilTest {
 
     @Test
     void test1_validateToken() {
-        String token = jwtUtil.generateAccessToken("username");
+        String token = jwtUtil.generateAccessToken("username", Collections.EMPTY_LIST);
         Assertions.assertTrue(jwtUtil.validateToken(token));
     }
 
     @Test
     void test2_validateToken() {
-        String token = jwtUtil.generateAccessToken("username");
+        String token = jwtUtil.generateAccessToken("username", Collections.EMPTY_LIST);
         token += "x";
         Assertions.assertFalse(jwtUtil.validateToken(token));
     }

@@ -14,10 +14,10 @@ public interface AccountActivityLogRepository extends JpaRepository<AccountActiv
 
     /**
      * Get all AccountActivityLog records by account id.
-     * @param accountId
+     * @param username
      * @param pageable
      * @return
      */
-    List<AccountActivityLog> findByAccountIdOrderByActivityOnDesc(UUID accountId, Pageable pageable);
+    List<AccountActivityLog> findByUsernameOrderByActivityOnDesc(String username, Pageable pageable);
 
 }

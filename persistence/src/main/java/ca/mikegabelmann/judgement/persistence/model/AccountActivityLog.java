@@ -33,18 +33,17 @@ public class AccountActivityLog implements Serializable {
     @Column(name = "MESSAGE", nullable = false, length = 1024)
     private String message;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ACCOUNT_ID", nullable = false)
-    private Account account;
+    @Column(name = "USERNAME", nullable = false, length = 16)
+    private String username;
 
 
     protected AccountActivityLog() {}
 
-    public AccountActivityLog(final UUID id, final Instant activityOn, final String message, final Account account) {
+    public AccountActivityLog(final UUID id, final Instant activityOn, final String message, final String username) {
         this.id = id;
         this.activityOn = activityOn;
         this.message = message;
-        this.account = account;
+        this.username = username;
     }
 
     public Instant getActivityOn() {
@@ -71,20 +70,13 @@ public class AccountActivityLog implements Serializable {
         this.message = message;
     }
 
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
 
     @Override
     public String toString() {
         return "AccountActivityLog{" +
                 ", id=" + id +
+                ", username='" + username + '\'' +
                 ", activityOn=" + activityOn +
-                ", account=" + account +
                 ", message='" + message + '\'' +
                 '}';
     }
@@ -93,18 +85,18 @@ public class AccountActivityLog implements Serializable {
     public final boolean equals(Object o) {
         if (!(o instanceof AccountActivityLog that)) return false;
 
-        return id.equals(that.id)
-                && activityOn.equals(that.activityOn)
-                && message.equals(that.message)
-                && Objects.equals(account, that.account);
+        return Objects.equals(id, that.id) &&
+                Objects.equals(activityOn, that.activityOn) &&
+                Objects.equals(message, that.message)
+                && Objects.equals(username, that.username);
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + activityOn.hashCode();
-        result = 31 * result + message.hashCode();
-        result = 31 * result + Objects.hashCode(account);
+        int result = Objects.hashCode(id);
+        result = 31 * result + Objects.hashCode(activityOn);
+        result = 31 * result + Objects.hashCode(message);
+        result = 31 * result + Objects.hashCode(username);
         return result;
     }
 

@@ -11,17 +11,17 @@ public interface AccountActivityLogService {
 
     /**
      *
-     * @param accountId
+     * @param username
      * @param pageable
      * @return
      */
-    List<AccountActivityLog> getLogsByAccountId(UUID accountId, Pageable pageable);
+    List<AccountActivityLog> getLogsByUsername(String username, Pageable pageable);
 
     /**
      *
-     * @param account
+     * @param username
      * @param message
      */
-    void saveLog(final Account account, final String message);
+    void save(final String username, final String message);
 
 }

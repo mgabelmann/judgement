@@ -23,15 +23,9 @@ public class HashingRestController {
     @Autowired
     private WebSecurityConfiguration webSecurityConfiguration;
 
-    @Value("${judgement.security.pepper}")
-    private String pepper;
-
     //http://localhost:8080/codes/hashpassword?password=123456
     @GetMapping(path = "/codes/hashpassword")
     public ResponseEntity<HashResponse> hashPassword(@RequestParam(name = "password") String password) {
-        String secret = pepper;
-        int saltLength = 32;
-        int iterations = 2;
         String algorithmName = WebSecurityConfiguration.DEFAULT_ENCODING_ID;
 
         /* Generate a random salt that we store in the DB (1/password). The password is stored as a hash,
@@ -43,8 +37,7 @@ public class HashingRestController {
 
         LOGGER.info("password={}, salt={}, hash={}", password, salt, hashedPassword);
 
-        //return ResponseEntity.ok(new HashResponse(algorithmName, WebSecurityConfiguration.urlEncode(hashedPassword), iterations, WebSecurityConfiguration.urlEncode(salt), saltLength, secret));
-        return ResponseEntity.ok(new HashResponse(algorithmName, hashedPassword, iterations, salt, saltLength, secret));
+        return ResponseEntity.ok(new HashResponse(algorithmName, hashedPassword, salt));
     }
 
     @GetMapping(path = "codes/verifypassword")
@@ -62,21 +55,14 @@ public class HashingRestController {
     }
 
     public static class HashResponse {
-        public String secret;
-        public int saltLength;
-        public int iterations;
         public String algorithm;
-
         public String salt;
         public String hashedPassword;
 
-        public HashResponse(String algorithm, String hashedPassword, int iterations, String salt, int saltLength, String secret) {
+        public HashResponse(String algorithm, String hashedPassword, String salt) {
             this.algorithm = algorithm;
             this.hashedPassword = hashedPassword;
-            this.iterations = iterations;
             this.salt = salt;
-            this.saltLength = saltLength;
-            this.secret = secret;
         }
     }
 

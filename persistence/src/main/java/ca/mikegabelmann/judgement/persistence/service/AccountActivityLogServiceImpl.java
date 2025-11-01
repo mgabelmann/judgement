@@ -27,13 +27,13 @@ public class AccountActivityLogServiceImpl implements AccountActivityLogService 
     }
 
     @Override
-    public List<AccountActivityLog> getLogsByAccountId(final UUID accountId, Pageable pageable) {
-        return accountActivityLogRepository.findByAccountIdOrderByActivityOnDesc(accountId, pageable);
+    public List<AccountActivityLog> getLogsByUsername(final String username, Pageable pageable) {
+        return accountActivityLogRepository.findByUsernameOrderByActivityOnDesc(username, pageable);
     }
 
     @Override
-    public void saveLog(final Account account, final String message) {
-        AccountActivityLog log = new AccountActivityLog(null, Instant.now(), message, account);
+    public void save(final String username, final String message) {
+        AccountActivityLog log = new AccountActivityLog(null, Instant.now(), message, username);
         accountActivityLogRepository.save(log);
     }
 
