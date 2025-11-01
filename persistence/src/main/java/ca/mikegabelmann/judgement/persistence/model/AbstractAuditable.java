@@ -6,22 +6,20 @@ import jakarta.persistence.Version;
 
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.UUID;
 
 
 /**
- * Audit fields are used by the application to track who/when an object
- * is created or modified. This could be a user or a system process.
+ * Audit fields are used by the application to track who/when an object is created or modified.
+ * This could be a user or a system process.
  * @author mgabelmann
  */
 @MappedSuperclass
 public abstract class AbstractAuditable implements Serializable {
+    @Column(name = "CREATEDBY", nullable = false, updatable = false, length = 16)
+    protected String createdBy;
 
-    @Column(name = "CREATEDBY", nullable = false, updatable = false)
-    protected UUID createdBy;
-
-    @Column(name = "MODIFIEDBY", nullable = false)
-    protected UUID modifiedBy;
+    @Column(name = "MODIFIEDBY", nullable = false, length = 16)
+    protected String modifiedBy;
 
     @Column(name = "CREATEDON_DTM", nullable = false, updatable = false)
     protected Instant createdOn;
@@ -33,6 +31,7 @@ public abstract class AbstractAuditable implements Serializable {
     @Column(name = "VERSION", nullable = false)
     protected Long version;
 
+
     /** Constructor. */
     protected AbstractAuditable() {
         ;
@@ -40,33 +39,33 @@ public abstract class AbstractAuditable implements Serializable {
 
     /**
      * Constructor.
-     * @param createdBy created by
-     * @param modifiedBy modified by
      * @param createdOn created on
+     * @param createdBy created by
      * @param modifiedOn modified on
+     * @param modifiedBy modified by
      * @param version version
      */
-    public AbstractAuditable(final UUID createdBy, final UUID modifiedBy, final Instant createdOn, final Instant modifiedOn, final Long version) {
-        this.createdBy = createdBy;
-        this.modifiedBy = modifiedBy;
+    public AbstractAuditable(final String createdBy, final Instant createdOn, final String modifiedBy, final Instant modifiedOn, final Long version) {
         this.createdOn = createdOn;
         this.modifiedOn = modifiedOn;
+        this.createdBy = createdBy;
+        this.modifiedBy = modifiedBy;
         this.version = version;
     }
 
-    public UUID getCreatedBy() {
+    public String getCreatedBy() {
         return createdBy;
     }
 
-    public void setCreatedBy(final UUID createdBy) {
+    public void setCreatedBy(final String createdBy) {
         this.createdBy = createdBy;
     }
 
-    public UUID getModifiedBy() {
+    public String getModifiedBy() {
         return modifiedBy;
     }
 
-    public void setModifiedBy(final UUID modifiedBy) {
+    public void setModifiedBy(final String modifiedBy) {
         this.modifiedBy = modifiedBy;
     }
 
@@ -92,6 +91,16 @@ public abstract class AbstractAuditable implements Serializable {
 
     public void setVersion(final Long version) {
         this.version = version;
+    }
+
+    @Override
+    public String toString() {
+        return  ", createdBy='" + createdBy + '\'' +
+                ", modifiedBy='" + modifiedBy + '\'' +
+                ", createdOn=" + createdOn +
+                ", modifiedOn=" + modifiedOn +
+                ", version=" + version
+                ;
     }
 
 }

@@ -10,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @DataJpaTest
+//@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+//@TestPropertySource(properties = {
+//        "spring.datasource.url=jdbc:sqlite:target/memory.db:judgement?cache=shared",
+//        "spring.jpa.hibernate.ddl-auto=create-drop",
+//})
 public class RoleCodeRepositoryTest {
     private final RoleCodeRepository roleCodeRepository;
 
@@ -40,4 +45,5 @@ public class RoleCodeRepositoryTest {
             rc.toString();
         });
     }
+
 }

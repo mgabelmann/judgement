@@ -1,0 +1,25 @@
+package ca.mikegabelmann.judgement.persistence.service;
+
+import ca.mikegabelmann.judgement.persistence.model.AccountActivityLog;
+import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+
+public interface AccountActivityLogService {
+
+    /**
+     *
+     * @param username
+     * @param pageable
+     * @return
+     */
+    List<AccountActivityLog> getLogsByUsername(String username, Pageable pageable);
+
+    /**
+     *
+     * @param username
+     * @param message
+     */
+    void save(final String username, final String message);
+
+}
