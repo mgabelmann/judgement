@@ -1,6 +1,5 @@
 package ca.mikegabelmann.judgement.persistence.service;
 
-import ca.mikegabelmann.judgement.persistence.model.Account;
 import ca.mikegabelmann.judgement.persistence.model.AccountActivityLog;
 import ca.mikegabelmann.judgement.persistence.repository.AccountActivityLogRepository;
 import org.slf4j.Logger;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 
 @Service

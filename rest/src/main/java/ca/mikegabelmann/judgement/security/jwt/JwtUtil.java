@@ -2,7 +2,6 @@ package ca.mikegabelmann.judgement.security.jwt;
 
 import ca.mikegabelmann.judgement.JudgementUtil;
 import ca.mikegabelmann.judgement.config.JudgementConfiguration;
-import ca.mikegabelmann.judgement.config.WebSecurityConfiguration;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -66,23 +65,9 @@ public class JwtUtil {
     public void postConstruct() {
         this.ensureVariableSet("jwt.secret", jwtSecret, "local");
         this.ensureVariableSet("jwt.refreshtoken.salt", refreshTokenSalt, "local");
-        //this.ensureVariableSet("jwt.secret", jwtSecret, "local");
 
         //set secret key for JWT
         this.secretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
-    }
-
-    private void ensureVariableSet(final String propertyName, final String value, final String profile) {
-        if (value == null || value.isEmpty()) {
-            //variable must have a value
-            throw new NullPointerException(propertyName + " can not be null or empty. You MUST set this value, preferably as an environment variable.");
-
-        } else if (judgementConfiguration.isProfileActive(profile)) {
-            LOGGER.warn("{}={}. NOTE: only displayed when using '{}' profile", propertyName, value, profile);
-
-        } else {
-            LOGGER.info("{} has been successfully set", propertyName);
-        }
     }
 
     /**
@@ -163,6 +148,26 @@ public class JwtUtil {
         }
 
         return false;
+    }
+
+    /**
+     * Helper method to ensure that a Spring property is set and not empty or null.
+     * @param propertyName Spring config property name
+     * @param value variable
+     * @param profile which profile is
+     * @throws NullPointerException value is null or empty
+     */
+    void ensureVariableSet(final String propertyName, final String value, final String profile) {
+        if (value == null || value.isEmpty()) {
+            //variable must have a value
+            throw new NullPointerException(propertyName + " can not be null or empty. You MUST set this value, preferably as an environment variable.");
+
+        } else if (judgementConfiguration.isProfileActive(profile)) {
+            LOGGER.warn("{}={}. NOTE: only displayed when using '{}' profile", propertyName, value, profile);
+
+        } else {
+            LOGGER.info("{} has been successfully set", propertyName);
+        }
     }
 
 }

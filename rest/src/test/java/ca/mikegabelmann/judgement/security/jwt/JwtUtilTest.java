@@ -12,23 +12,26 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {JwtUtil.class, JudgementConfiguration.class})
 @TestPropertySource(properties = {
         "jwt.secret=a9c9cca61f97e3d9bf484cdbc870b7ca7e37d77bfe4dfd464bff5d505f2de3d7",
+        "jwt.refreshtoken.salt=a9c9cca61f97e3d9bf484cdbc870b7ca7e37d77bfe4dfd464bff5d505f2de3d7",
         "jwt.access.expiration=3600000",
         "jwt.refresh.expiration=84000000"}
 )
 class JwtUtilTest {
-
     @Autowired
     private JwtUtil jwtUtil;
+
 
     @BeforeEach
     void beforeEach() {
@@ -40,12 +43,6 @@ class JwtUtilTest {
         String token = jwtUtil.generateAccessToken("username", Collections.EMPTY_LIST);
         Assertions.assertNotNull(token);
     }
-
-//    @Test
-//    void generateRefreshToken() {
-//        String token = jwtUtil.generateRefreshToken("username");
-//        Assertions.assertNotNull(token);
-//    }
 
     @Test
     void getUsernameFromToken() {
@@ -83,18 +80,36 @@ class JwtUtilTest {
         Assertions.assertEquals(authorities, roles);
     }
 
-//    @Test
-//    void test2_generateRefreshToken() {
-//        Set<SimpleGrantedAuthority> authorities = new HashSet<>();
-//        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-//        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//        String token = jwtUtil.generateRefreshToken().toString();//.generateRefreshToken("username", authorities);
-//
-//        Assertions.assertNotNull(token);
-//
-//        Collection<? extends GrantedAuthority> roles = jwtUtil.parseRolesFromToken(token);
-//        Assertions.assertNotNull(roles);
-//        Assertions.assertEquals(2, roles.size());
-//    }
+    @Test
+    void test3_generateRefreshToken() {
+        String token = jwtUtil.generateRefreshToken();
+        Assertions.assertNotNull(token);
+        Assertions.assertDoesNotThrow(() -> UUID.fromString(token));
+    }
+
+    @Test
+    void test1_getRefreshTokenExpiration() {
+        Assertions.assertTrue(Instant.now().isBefore(jwtUtil.getRefreshTokenExpiration()));
+    }
+
+    @Test
+    void test1_hashRefreshToken() {
+        String token = jwtUtil.generateRefreshToken();
+        Assertions.assertNotNull(token);
+
+        String hashedToken = Assertions.assertDoesNotThrow(() -> jwtUtil.hashRefreshToken(token));
+        Assertions.assertNotNull(hashedToken);
+    }
+
+    @Test
+    void test1_ensureVariableSet() {
+        Assertions.assertThrows(NullPointerException.class, () -> jwtUtil.ensureVariableSet("x", null, ""));
+        Assertions.assertThrows(NullPointerException.class, () -> jwtUtil.ensureVariableSet("x", "", ""));
+    }
+
+    @Test
+    void test2_ensureVariableSet() {
+        Assertions.assertDoesNotThrow(() -> jwtUtil.ensureVariableSet("x", "aaa", ""));
+    }
 
 }

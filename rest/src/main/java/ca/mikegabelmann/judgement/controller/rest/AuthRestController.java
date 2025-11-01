@@ -14,9 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,9 +29,6 @@ import java.util.Optional;
 public class AuthRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthRestController.class);
 
-    private final SecurityContextRepository securityContextRepository;
-    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
-    //private final AuthenticationProvider authenticationProvider;
     private final JudgementAuthenticationProvider authenticationProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
@@ -44,11 +39,11 @@ public class AuthRestController {
     public AuthRestController(
             //final AuthenticationProvider authenticationProvider,
             final JudgementAuthenticationProvider authenticationProvider,
-            final SecurityContextRepository securityContextRepository,
             final RefreshTokenRepository refreshTokenRepository,
-            final JwtUtil jwtUtil, JudgementUserDetailsService judgementUserDetailsService, AccountActivityLogService accountActivityLogService) {
+            final JwtUtil jwtUtil,
+            final JudgementUserDetailsService judgementUserDetailsService,
+            final AccountActivityLogService accountActivityLogService) {
 
-        this.securityContextRepository = securityContextRepository;
         this.authenticationProvider = authenticationProvider;
         this.refreshTokenRepository = refreshTokenRepository;
         this.jwtUtil = jwtUtil;
@@ -168,20 +163,29 @@ public class AuthRestController {
         return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
     }
 
+    //curl -v http://localhost:8080/jwtlogout -H "cache-control: no-cache" -H "content-type: application/json" -H "Authorization: Bearer <accesstoken>" -d "{\"refresh\":\"<refreshtoken>\"}"
+    //curl -v http://localhost:8080/jwtlogout -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
     @PostMapping("/jwtlogout")
     public ResponseEntity<?> jwtLogout(@RequestBody JwtRefreshTokenRequest token) throws NoSuchAlgorithmException {
-        String oldHashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
-        Optional<RefreshToken> oldToken = refreshTokenRepository.findByToken(oldHashedToken);
+        String hashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
+        Optional<RefreshToken> tmpOrigToken = refreshTokenRepository.findByToken(hashedToken);
 
-        if (oldToken.isPresent()) {
-            String username = jwtUtil.getUsernameFromToken(token.getRefresh());
+        if (tmpOrigToken.isPresent()) {
+            RefreshToken dbToken = tmpOrigToken.get();
 
-            refreshTokenRepository.delete(oldToken.get());
-            SecurityContextHolder.clearContext();
+            //UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            //String username = userDetails.getUsername();
+            String username = dbToken.getUsername();
+
+            //delete refresh token
+            refreshTokenRepository.delete(dbToken);
 
             //save logout
             LOGGER.debug("user={}: logout", username);
             accountActivityLogService.save(username, "logout");
+
+            //clear context
+            SecurityContextHolder.clearContext();
 
             return ResponseEntity.ok().body("User " + username + " has been logged out");
         }

@@ -2,7 +2,6 @@ package ca.mikegabelmann.judgement.config;
 
 import ca.mikegabelmann.judgement.security.jwt.JwtAuthenticationEntryPoint;
 import ca.mikegabelmann.judgement.security.jwt.JwtRequestFilter;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,20 +21,10 @@ import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.MessageDigestPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.security.web.context.DelegatingSecurityContextRepository;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,14 +41,12 @@ public class WebSecurityConfiguration {
     @Value("${judgement.security.web.debug:false}")
     private boolean securityDebug;
 
-    private final JudgementConfiguration judgementConfiguration;
     private final JwtRequestFilter jwtRequestFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
 
     @Autowired
-    public WebSecurityConfiguration(JudgementConfiguration judgementConfiguration, JwtRequestFilter jwtRequestFilter, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
-        this.judgementConfiguration = judgementConfiguration;
+    public WebSecurityConfiguration(final JwtRequestFilter jwtRequestFilter, final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
         this.jwtRequestFilter = jwtRequestFilter;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
@@ -74,19 +61,17 @@ public class WebSecurityConfiguration {
                 .requestMatchers("/codes/**").permitAll()
                 .requestMatchers("/jwtlogin").permitAll()
                 .requestMatchers("/jwtrefresh").permitAll()
-                //.requestMatchers("/jwtlogout").permitAll()
+                .requestMatchers("/jwtlogout").permitAll()
                 .requestMatchers("/loginsuccess").permitAll()
                 .anyRequest().authenticated())
+
             .httpBasic(Customizer.withDefaults())
-
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-
-            //used to store JSESSIONID
-            .securityContext((securityContext) -> securityContext.securityContextRepository(securityContextRepository()))
-            .requestCache(RequestCacheConfigurer::disable)
 
             //.formLogin(Customizer.withDefaults())
             .formLogin(AbstractHttpConfigurer::disable)
+
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+            .requestCache(RequestCacheConfigurer::disable)
             .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
             //.logout((logout) -> logout.clearAuthentication(true).invalidateHttpSession(true).logoutUrl("/jwtlogout").permitAll().deleteCookies("JSESSIONID").logoutSuccessHandler(logoutSuccessHandler()))
@@ -97,6 +82,7 @@ public class WebSecurityConfiguration {
         return http.build();
     }
 
+/*
     @Bean
     public LogoutSuccessHandler logoutSuccessHandler() {
         return (request, response, authentication) -> {
@@ -105,13 +91,7 @@ public class WebSecurityConfiguration {
             response.getWriter().write("{\"statusCode\":200,\"message\":\"You have been logged out successfully.\",\"data\":true}");
         };
     }
-
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new DelegatingSecurityContextRepository(
-                new RequestAttributeSecurityContextRepository(),
-                new HttpSessionSecurityContextRepository());
-    }
+*/
 
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
@@ -123,7 +103,6 @@ public class WebSecurityConfiguration {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        //String secret = this.pepper;
         String encodingId = DEFAULT_ENCODING_ID;
 
         Map<String, PasswordEncoder> encoders = new HashMap<>();
