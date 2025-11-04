@@ -20,10 +20,10 @@ public class AccountRestController {
     public static final String PATH_RESET = "/reset";
 
 
-    private AccountService accountService;
+    private final AccountService accountService;
 
     @Autowired
-    public AccountRestController(AccountService accountService) {
+    public AccountRestController(final AccountService accountService) {
         this.accountService = accountService;
     }
 

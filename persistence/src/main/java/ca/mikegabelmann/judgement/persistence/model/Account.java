@@ -157,15 +157,14 @@ public class Account extends AbstractAuditable {
                 + ", accountRole='"
                 + accountRole
                 + '\''
-                + super.toString() +
+                + super.toString()
                 + '}';
     }
 
     @Override
     public boolean equals(final Object o) {
         if (this == o) return true;
-        if (!(o instanceof Account)) return false;
-        Account that = (Account) o;
+        if (!(o instanceof Account that)) return false;
         return Objects.equals(id, that.id)
                 && Objects.equals(createdBy, that.createdBy)
                 && Objects.equals(createdOn, that.createdOn)

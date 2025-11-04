@@ -74,7 +74,7 @@ class JwtUtilTest {
 
         Assertions.assertNotNull(token);
 
-        Collection<? extends GrantedAuthority> roles = jwtUtil.parseRolesFromToken(token);
+        Collection<? extends GrantedAuthority> roles = jwtUtil.getRolesFromToken(token);
         Assertions.assertNotNull(roles);
         Assertions.assertEquals(2, roles.size());
         Assertions.assertEquals(authorities, roles);

@@ -18,9 +18,9 @@ import java.util.List;
 public class CodesRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(CodesRestController.class);
 
-    public static final String PATH_ROLE_CODES = "/codes/rolecodes";
-    public static final String PATH_ACCOUNT_STATUS_CODES = "/codes/accountstatuscodes";
-    public static final String PATH_PROJECT_ROLE_CODES = "/codes/projectrolecodes";
+    public static final String PATH_ROLE_CODES = "/api/codes/rolecodes";
+    public static final String PATH_ACCOUNT_STATUS_CODES = "/api/codes/accountstatuscodes";
+    public static final String PATH_PROJECT_ROLE_CODES = "/api/codes/projectrolecodes";
 
     private final CodesService codesService;
 

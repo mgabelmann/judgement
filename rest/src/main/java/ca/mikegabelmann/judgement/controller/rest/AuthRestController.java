@@ -9,6 +9,7 @@ import ca.mikegabelmann.judgement.security.jwt.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,9 +32,10 @@ public class AuthRestController {
 
     private final JudgementAuthenticationProvider authenticationProvider;
     private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtUtil jwtUtil;
     private final JudgementUserDetailsService judgementUserDetailsService;
     private final AccountActivityLogService accountActivityLogService;
+    private final JwtUtil jwtUtil;
+
 
     @Autowired
     public AuthRestController(
@@ -51,29 +53,8 @@ public class AuthRestController {
         this.accountActivityLogService = accountActivityLogService;
     }
 
-/*
-    @PostMapping(path = "/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
-
-        UsernamePasswordAuthenticationToken authRequest = UsernamePasswordAuthenticationToken.unauthenticated(loginRequest.getUsername(), loginRequest.getPassword());
-
-        Authentication authResponse = authenticationProvider.authenticate(authRequest);
-
-        //NOTE: this auth provider prefixes the users password with a random salt that is then stored in the DB and reused on reauthentication
-        //Authentication authResponse = judgementAuthenticationProviderServiceImpl.authenticate(authRequest);
-
-        //persist our authentication
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-        context.setAuthentication(authResponse);
-        securityContextHolderStrategy.setContext(context);
-        securityContextRepository.saveContext(context, request, response);
-
-        return new ResponseEntity<>("user authenticated", HttpStatus.OK);
-    }
-*/
-
-    //curl -v http://localhost:8080/login -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"username\":\"ADMIN\",\"password\":\"123456\"}"
-    @PostMapping(path = "/jwtlogin")
+    //curl -v http://localhost:8080/api/jwtlogin -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"username\":\"ADMIN\",\"password\":\"123456\"}"
+    @PostMapping(path = "/api/jwtlogin")
     public ResponseEntity<?> jwtLogin(@RequestBody JwtLoginRequest loginRequest) throws NoSuchAlgorithmException {
         String username = loginRequest.getUsername();
 
@@ -117,8 +98,8 @@ public class AuthRestController {
         return ResponseEntity.ok(new JwtTokenResponse(accessToken, refreshToken));
     }
 
-    //curl -v http://localhost:8080/jwtrefresh -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
-    @PostMapping(path = "/jwtrefresh")
+    //curl -v http://localhost:8080/api/jwtrefresh -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
+    @PostMapping(path = "/api/jwtrefresh")
     public ResponseEntity<?> jwtRefresh(@RequestBody JwtRefreshTokenRequest token) throws NoSuchAlgorithmException {
         String oldHashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
         Optional<RefreshToken> oldToken = refreshTokenRepository.findByToken(oldHashedToken);
@@ -163,9 +144,8 @@ public class AuthRestController {
         return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
     }
 
-    //curl -v http://localhost:8080/jwtlogout -H "cache-control: no-cache" -H "content-type: application/json" -H "Authorization: Bearer <accesstoken>" -d "{\"refresh\":\"<refreshtoken>\"}"
-    //curl -v http://localhost:8080/jwtlogout -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
-    @PostMapping("/jwtlogout")
+    //curl -v http://localhost:8080/api/jwtlogout -H "cache-control: no-cache" -H "content-type: application/json" -d "{\"refresh\":\"<refreshtoken>\"}"
+    @PostMapping(path = "/api/jwtlogout")
     public ResponseEntity<?> jwtLogout(@RequestBody JwtRefreshTokenRequest token) throws NoSuchAlgorithmException {
         String hashedToken = jwtUtil.hashRefreshToken(token.getRefresh());
         Optional<RefreshToken> tmpOrigToken = refreshTokenRepository.findByToken(hashedToken);
@@ -193,20 +173,39 @@ public class AuthRestController {
         return ResponseEntity.badRequest().body("refresh token " + token.getRefresh() + " does not exist");
     }
 
+    @PostMapping(path = "/api/jwtchange")
+    public ResponseEntity<?> changePassword(@RequestBody JwtChangePasswordRequest token) throws NoSuchAlgorithmException {
+        if (token.getOldPassword().equals(token.getNewPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("old password and new password are the same");
+        }
+
+        //TODO: finish this (change password)
+
+        return ResponseEntity.ok().body("password changed");
+    }
+
+    @PostMapping(path = "/api/jwtreset")
+    public ResponseEntity<?> resetAccount() throws NoSuchAlgorithmException {
+
+        //TODO: finish this (reset password)
+
+        return ResponseEntity.ok().body("success");
+    }
+
+
+    @PostMapping(path = "/api/jwtcreate")
+    public ResponseEntity<?> createAccount() throws NoSuchAlgorithmException {
+
+        //TODO: finish this (create account)
+
+        return ResponseEntity.ok().body("success");
+    }
+
     //curl -v http://localhost:8080/testsecured -H "cache-control: no-cache" -H "content-type: application/json" -H "Authorization: Bearer <accesstoken>"
-    @GetMapping("/testsecured")
+    @Profile({"local", "dev"})
+    @GetMapping("/api/testsecured")
     public ResponseEntity<String> testSecured() {
         return new ResponseEntity<>("<h1 style=\"color=#F00\">Secure end point</h1>", HttpStatus.OK);
-    }
-
-    @GetMapping("/loginsuccess")
-    public ResponseEntity<String> loginsuccess() {
-        return new ResponseEntity<>("<h1>login - success</h1>", HttpStatus.OK);
-    }
-
-    @GetMapping("/logoutsuccess")
-    public ResponseEntity<String> logoutsuccess() {
-        return new ResponseEntity<>("<h1>logout - success</h1>", HttpStatus.OK);
     }
 
     /**
@@ -279,6 +278,34 @@ public class AuthRestController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+
+    public static class JwtChangePasswordRequest {
+        private String oldPassword;
+        private String newPassword;
+
+        protected JwtChangePasswordRequest() {}
+
+        public JwtChangePasswordRequest(final String oldPassword, final String newPassword) {
+            this.oldPassword = oldPassword;
+            this.newPassword = newPassword;
+        }
+
+        public String getNewPassword() {
+            return newPassword;
+        }
+
+        public void setNewPassword(String newPassword) {
+            this.newPassword = newPassword;
+        }
+
+        public String getOldPassword() {
+            return oldPassword;
+        }
+
+        public void setOldPassword(String oldPassword) {
+            this.oldPassword = oldPassword;
         }
     }
 

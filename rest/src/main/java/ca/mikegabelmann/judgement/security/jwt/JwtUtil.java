@@ -80,14 +80,28 @@ public class JwtUtil {
         return this.generateToken(username, authorities, jwtAccessExpiration, secretKey, ALGORITHM);
     }
 
+    /**
+     *
+     * @return
+     */
     public String generateRefreshToken() {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     *
+     * @return
+     */
     public Instant getRefreshTokenExpiration() {
         return Instant.now().plusMillis(jwtRefreshExpiration);
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
     public String hashRefreshToken(final String token) throws NoSuchAlgorithmException {
         String salt = this.refreshTokenSalt;
         byte[] tokenToHash = (salt + token).getBytes(StandardCharsets.UTF_8);
@@ -98,6 +112,15 @@ public class JwtUtil {
         return JudgementUtil.bytesToHex(hash);
     }
 
+    /**
+     *
+     * @param username
+     * @param authorities
+     * @param expiry
+     * @param secretKey
+     * @param algorithm
+     * @return
+     */
     public String generateToken(final String username, Collection<? extends GrantedAuthority> authorities, final int expiry, final SecretKey secretKey, final MacAlgorithm algorithm) {
         LOGGER.debug("generate JWT token for username {}", username);
 
@@ -112,7 +135,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    public Collection<? extends GrantedAuthority> parseRolesFromToken(final String token) {
+    /**
+     *
+     * @param token
+     * @return
+     */
+    public Collection<? extends GrantedAuthority> getRolesFromToken(final String token) {
         Jws<Claims> claims = Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
         String roleStr =  claims.getPayload().get("roles").toString();
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(roleStr.split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
@@ -122,10 +150,20 @@ public class JwtUtil {
         return authorities;
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     */
     public String getUsernameFromToken(final String token) {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getSubject();
     }
 
+    /**
+     *
+     * @param token
+     * @return
+     */
     public boolean validateToken(final String token) {
         try {
             Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);

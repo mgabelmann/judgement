@@ -16,11 +16,15 @@ import org.springframework.web.bind.annotation.RestController;
 public class HashingRestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(HashingRestController.class);
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final WebSecurityConfiguration webSecurityConfiguration;
+
 
     @Autowired
-    private WebSecurityConfiguration webSecurityConfiguration;
+    public HashingRestController(final PasswordEncoder passwordEncoder, final WebSecurityConfiguration webSecurityConfiguration) {
+        this.passwordEncoder = passwordEncoder;
+        this.webSecurityConfiguration = webSecurityConfiguration;
+    }
 
     //http://localhost:8080/codes/hashpassword?password=123456
     @GetMapping(path = "/codes/hashpassword")

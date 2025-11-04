@@ -53,6 +53,12 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.batch</groupId>
+            <artifactId>spring-batch-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- NOTE: enables spring data rest endpoints, so you don't need services, exposes @Entity objects -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
